@@ -1,0 +1,23 @@
+name: ESPNLiquidGlass
+options:
+  bundleIdPrefix: com.espn
+  deploymentTarget:
+    iOS: 18.0
+settings:
+  base:
+    MARKETING_VERSION: 1.0.0
+    CURRENT_PROJECT_VERSION: 1
+    DEVELOPMENT_TEAM: ""
+    SWIFT_VERSION: 6.0
+targets:
+  ESPNLiquidGlass:
+    type: application
+    platform: iOS
+    sources:
+      - ESPNLiquidGlass
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.espn.liquidglass
+        INFOPLIST_FILE: ESPNLiquidGlass/Info.plist
+        TARGETED_DEVICE_FAMILY: 1
+        SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: NO

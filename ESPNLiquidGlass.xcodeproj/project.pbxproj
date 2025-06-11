@@ -1,0 +1,379 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		02005633206C6F040E54D457 /* League.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E007CCA90396BD189C274B2 /* League.swift */; };
+		15EF8D6224E310BE1B847DF4 /* ESPNLiquidGlassApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A5A71C2D41226D0ECBB7B96 /* ESPNLiquidGlassApp.swift */; };
+		188BDA23F897ECCE41B17152 /* Sport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39CFE7F73A5CEB28DD2988D3 /* Sport.swift */; };
+		1978136D96DFA7845AA5D83D /* ArticleDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50509C1FEAE73A8195BBD35A /* ArticleDetailView.swift */; };
+		1AFD54C73D97E8004BAB2AB7 /* Team.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B12E7C5798C059041EDCF7 /* Team.swift */; };
+		37765627C8FDAC8E9BFE4B56 /* Game.swift in Sources */ = {isa = PBXBuildFile; fileRef = 584D8656564BB767AB2AC265 /* Game.swift */; };
+		600C27D05B56464CC0DF27AA /* Article.swift in Sources */ = {isa = PBXBuildFile; fileRef = 556590EA581829C64AAD8E75 /* Article.swift */; };
+		60AB65173A50EDBB7A49CCB8 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05218E1B35D013C2388C322E /* HomeView.swift */; };
+		627A2E1096375815715DC193 /* ESPNPlusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 284D808A25D67C72DFD01367 /* ESPNPlusView.swift */; };
+		77734226503B19848E001A4E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FEE66B13F686D18312E51EC /* ContentView.swift */; };
+		79F93FDF906B067BD88F6E73 /* WatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6578FCB89A50881CBFF650CF /* WatchView.swift */; };
+		97A6DD0F499A5EAFEFC3A037 /* MoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59FA27E5C8EB0662F63B4B20 /* MoreView.swift */; };
+		9B9D378DF72B0B039CAA04A0 /* ScoresView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB9650F17DB9016F4EEF37BD /* ScoresView.swift */; };
+		9C39DF3111BA9CD51451DD73 /* LiquidGlassEffects.swift in Sources */ = {isa = PBXBuildFile; fileRef = C08CCE6AAC952D4BAF444B4D /* LiquidGlassEffects.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		05218E1B35D013C2388C322E /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		284D808A25D67C72DFD01367 /* ESPNPlusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ESPNPlusView.swift; sourceTree = "<group>"; };
+		31B12E7C5798C059041EDCF7 /* Team.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Team.swift; sourceTree = "<group>"; };
+		39CFE7F73A5CEB28DD2988D3 /* Sport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sport.swift; sourceTree = "<group>"; };
+		3FEE66B13F686D18312E51EC /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		50509C1FEAE73A8195BBD35A /* ArticleDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArticleDetailView.swift; sourceTree = "<group>"; };
+		556590EA581829C64AAD8E75 /* Article.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Article.swift; sourceTree = "<group>"; };
+		584D8656564BB767AB2AC265 /* Game.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Game.swift; sourceTree = "<group>"; };
+		59FA27E5C8EB0662F63B4B20 /* MoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreView.swift; sourceTree = "<group>"; };
+		5E007CCA90396BD189C274B2 /* League.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = League.swift; sourceTree = "<group>"; };
+		62C0BA29358983FDB7E51123 /* .gitignore */ = {isa = PBXFileReference; path = .gitignore; sourceTree = "<group>"; };
+		641A7F75C745482FF48C2723 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		6578FCB89A50881CBFF650CF /* WatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchView.swift; sourceTree = "<group>"; };
+		9A5A71C2D41226D0ECBB7B96 /* ESPNLiquidGlassApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ESPNLiquidGlassApp.swift; sourceTree = "<group>"; };
+		AB9650F17DB9016F4EEF37BD /* ScoresView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoresView.swift; sourceTree = "<group>"; };
+		C08CCE6AAC952D4BAF444B4D /* LiquidGlassEffects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidGlassEffects.swift; sourceTree = "<group>"; };
+		D20D399CC915C46B129E7648 /* ESPNLiquidGlass.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ESPNLiquidGlass.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		04EF83CAD2910A6E1A981C7A = {
+			isa = PBXGroup;
+			children = (
+				B3AA3FAD822A8041662D358A /* ESPNLiquidGlass */,
+				2A6B2E339548A718DFF7789E /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		2A6B2E339548A718DFF7789E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D20D399CC915C46B129E7648 /* ESPNLiquidGlass.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		3C922A91825F840B3E279FB7 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				C08CCE6AAC952D4BAF444B4D /* LiquidGlassEffects.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		6B96048EF944C723321CB35C /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				556590EA581829C64AAD8E75 /* Article.swift */,
+				584D8656564BB767AB2AC265 /* Game.swift */,
+				5E007CCA90396BD189C274B2 /* League.swift */,
+				39CFE7F73A5CEB28DD2988D3 /* Sport.swift */,
+				31B12E7C5798C059041EDCF7 /* Team.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		8C8120A40B010B3BBCD463BF /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				50509C1FEAE73A8195BBD35A /* ArticleDetailView.swift */,
+				3FEE66B13F686D18312E51EC /* ContentView.swift */,
+				284D808A25D67C72DFD01367 /* ESPNPlusView.swift */,
+				05218E1B35D013C2388C322E /* HomeView.swift */,
+				59FA27E5C8EB0662F63B4B20 /* MoreView.swift */,
+				AB9650F17DB9016F4EEF37BD /* ScoresView.swift */,
+				6578FCB89A50881CBFF650CF /* WatchView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		B3AA3FAD822A8041662D358A /* ESPNLiquidGlass */ = {
+			isa = PBXGroup;
+			children = (
+				62C0BA29358983FDB7E51123 /* .gitignore */,
+				641A7F75C745482FF48C2723 /* Info.plist */,
+				FBCF17A5201B830FC53777AD /* App */,
+				6B96048EF944C723321CB35C /* Models */,
+				3C922A91825F840B3E279FB7 /* Utils */,
+				8C8120A40B010B3BBCD463BF /* Views */,
+			);
+			path = ESPNLiquidGlass;
+			sourceTree = "<group>";
+		};
+		FBCF17A5201B830FC53777AD /* App */ = {
+			isa = PBXGroup;
+			children = (
+				9A5A71C2D41226D0ECBB7B96 /* ESPNLiquidGlassApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		581FA126ED5933C27A8D22F3 /* ESPNLiquidGlass */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 49D22B914BEFAFA99834337A /* Build configuration list for PBXNativeTarget "ESPNLiquidGlass" */;
+			buildPhases = (
+				8056A507B85DADEC4A4B7F60 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ESPNLiquidGlass;
+			packageProductDependencies = (
+			);
+			productName = ESPNLiquidGlass;
+			productReference = D20D399CC915C46B129E7648 /* ESPNLiquidGlass.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D9C35CC59D0385BD796F950B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					581FA126ED5933C27A8D22F3 = {
+						DevelopmentTeam = "";
+					};
+				};
+			};
+			buildConfigurationList = 4A31BCC1F2FBE10DDF213C3A /* Build configuration list for PBXProject "ESPNLiquidGlass" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 04EF83CAD2910A6E1A981C7A;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 54;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				581FA126ED5933C27A8D22F3 /* ESPNLiquidGlass */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8056A507B85DADEC4A4B7F60 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				600C27D05B56464CC0DF27AA /* Article.swift in Sources */,
+				1978136D96DFA7845AA5D83D /* ArticleDetailView.swift in Sources */,
+				77734226503B19848E001A4E /* ContentView.swift in Sources */,
+				15EF8D6224E310BE1B847DF4 /* ESPNLiquidGlassApp.swift in Sources */,
+				627A2E1096375815715DC193 /* ESPNPlusView.swift in Sources */,
+				37765627C8FDAC8E9BFE4B56 /* Game.swift in Sources */,
+				60AB65173A50EDBB7A49CCB8 /* HomeView.swift in Sources */,
+				02005633206C6F040E54D457 /* League.swift in Sources */,
+				9C39DF3111BA9CD51451DD73 /* LiquidGlassEffects.swift in Sources */,
+				97A6DD0F499A5EAFEFC3A037 /* MoreView.swift in Sources */,
+				9B9D378DF72B0B039CAA04A0 /* ScoresView.swift in Sources */,
+				188BDA23F897ECCE41B17152 /* Sport.swift in Sources */,
+				1AFD54C73D97E8004BAB2AB7 /* Team.swift in Sources */,
+				79F93FDF906B067BD88F6E73 /* WatchView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1E3666737A5CABA40979411D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = ESPNLiquidGlass/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.espn.liquidglass;
+				SDKROOT = iphoneos;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		4817C5DC6A0AF597A783F7FB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		7976BBB91A7CD08938554115 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = ESPNLiquidGlass/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.espn.liquidglass;
+				SDKROOT = iphoneos;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		ECC40579897CD73AF9A4AF5F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		49D22B914BEFAFA99834337A /* Build configuration list for PBXNativeTarget "ESPNLiquidGlass" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1E3666737A5CABA40979411D /* Debug */,
+				7976BBB91A7CD08938554115 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		4A31BCC1F2FBE10DDF213C3A /* Build configuration list for PBXProject "ESPNLiquidGlass" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ECC40579897CD73AF9A4AF5F /* Debug */,
+				4817C5DC6A0AF597A783F7FB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D9C35CC59D0385BD796F950B /* Project object */;
+}

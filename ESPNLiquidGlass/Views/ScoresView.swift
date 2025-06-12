@@ -99,12 +99,13 @@ struct ScoresView: View {
                     .padding(.vertical, 8)
                     
                     ScrollView {
-                        VStack(spacing: 1) {
+                        LazyVStack(spacing: 1) {
                             ForEach(filteredGames) { game in
                                 GameRow(game: game, isFavorite: false)
                             }
                         }
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
                 .background(Color.black)
             }

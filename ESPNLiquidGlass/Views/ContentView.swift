@@ -1,62 +1,31 @@
 import SwiftUI
 
+/// Root view that shows the five ESPN tabs with Apple’s stock `TabView` styling.
 struct ContentView: View {
     @State private var selectedTab = 0
-    
+
     var body: some View {
         TabView(selection: $selectedTab) {
+
             HomeView()
-                .tabItem {
-                    Label("Home", systemImage: "house.fill")
-                }
+                .tabItem { Label("Home", systemImage: "house") }
                 .tag(0)
-            
+
             ScoresView()
-                .tabItem {
-                    Label("Scores", systemImage: "sportscourt.fill")
-                }
+                .tabItem { Label("Scores", systemImage: "sportscourt") }
                 .tag(1)
-            
+
             WatchView()
-                .tabItem {
-                    Label("Watch", systemImage: "play.fill")
-                }
+                .tabItem { Label("Watch", systemImage: "play.rectangle") }
                 .tag(2)
-            
+
             ESPNPlusView()
-                .tabItem {
-                    Label("ESPN+", systemImage: "plus")
-                }
+                .tabItem { Label("ESPN+", systemImage: "plus.rectangle") }
                 .tag(3)
-            
+
             MoreView()
-                .tabItem {
-                    Label("More", systemImage: "ellipsis")
-                }
+                .tabItem { Label("More", systemImage: "ellipsis") }
                 .tag(4)
         }
-        .tint(.white)
-        .onAppear {
-            setupTabBarAppearance()
-        }
-    }
-    
-    func setupTabBarAppearance() {
-        let appearance = UITabBarAppearance()
-        appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = UIColor.black.withAlphaComponent(0.9)
-        
-        let itemAppearance = UITabBarItemAppearance()
-        itemAppearance.normal.iconColor = UIColor.gray
-        itemAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.gray]
-        itemAppearance.selected.iconColor = UIColor.white
-        itemAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.white]
-        
-        appearance.stackedLayoutAppearance = itemAppearance
-        appearance.inlineLayoutAppearance = itemAppearance
-        appearance.compactInlineLayoutAppearance = itemAppearance
-        
-        UITabBar.appearance().standardAppearance = appearance
-        UITabBar.appearance().scrollEdgeAppearance = appearance
     }
 }

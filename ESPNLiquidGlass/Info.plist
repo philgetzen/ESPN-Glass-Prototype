@@ -42,5 +42,11 @@
     </array>
     <key>UIUserInterfaceStyle</key>
     <string>Dark</string>
+    <key>UIStatusBarHidden</key>
+    <true/>
+    <key>UIViewControllerBasedStatusBarAppearance</key>
+    <false/>
+    <key>UILaunchStoryboardName</key>
+    <string></string>
 </dict>
 </plist>

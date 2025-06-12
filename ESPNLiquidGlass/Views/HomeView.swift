@@ -7,30 +7,34 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 0) {
+                LazyVStack(spacing: 20) {
                     ForEach(articles) { article in
                         ArticleCard(article: article)
                             .onTapGesture {
                                 selectedArticle = article
                             }
-                        
-                        if article.id != articles.last?.id {
-                            Divider()
-                                .background(Color.gray.opacity(0.3))
-                        }
                     }
                 }
-                .background(Color.black)
+                .padding(.vertical)
             }
-            .background(Color.black)
+            .background(.black)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .safeAreaInset(edge: .bottom) { Spacer().frame(height: 60) }
             .navigationTitle("Home")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {}) {
                         Image(systemName: "magnifyingglass")
                             .foregroundColor(.white)
+                            .glowEffect(
+                                color: .blue,
+                                radius: 3,
+                                intensity: .subtle,
+                                pulsation: .none
+                            )
                     }
+                    .liquidGlassButtonStyle(cornerRadius: 8)
                 }
             }
             .sheet(item: $selectedArticle) { article in
@@ -45,7 +49,7 @@ struct ArticleCard: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Image
+            // Image with Liquid Glass background
             Rectangle()
                 .fill(LinearGradient(
                     colors: [Color.gray.opacity(0.3), Color.gray.opacity(0.1)],
@@ -53,12 +57,18 @@ struct ArticleCard: View {
                     endPoint: .bottomTrailing
                 ))
                 .aspectRatio(16/9, contentMode: .fit)
+                .liquidGlassBackground(density: .light, flowDirection: .natural)
                 .overlay(alignment: .center) {
                     if article.type == .video {
                         Image(systemName: "play.circle.fill")
                             .font(.system(size: 60))
                             .foregroundColor(.white)
-                            .shadow(radius: 10)
+                            .glowEffect(
+                                color: .white,
+                                radius: 10,
+                                intensity: .medium,
+                                pulsation: .gentle
+                            )
                     }
                 }
             
@@ -126,7 +136,8 @@ struct ArticleCard: View {
             .padding(.horizontal)
             .padding(.bottom)
         }
-        .background(Color.black)
+        .liquidGlassCard(cornerRadius: 16, density: .medium)
+        .padding(.horizontal)
     }
     
     func formatNumber(_ number: Int) -> String {

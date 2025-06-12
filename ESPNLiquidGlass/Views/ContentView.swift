@@ -12,22 +12,36 @@ struct ContentView: View {
                 .tabItem { Label("Home", systemImage: "house") }
                 .tag(0)
 
-            ScoresView()
+            ScoresView(colorScheme: $colorScheme)
                 .tabItem { Label("Scores", systemImage: "sportscourt") }
                 .tag(1)
 
-            WatchView()
+            WatchView(colorScheme: $colorScheme)
                 .tabItem { Label("Watch", systemImage: "play.rectangle") }
                 .tag(2)
 
-            ESPNPlusView()
+            ESPNPlusView(colorScheme: $colorScheme)
                 .tabItem { Label("ESPN+", systemImage: "plus.rectangle") }
                 .tag(3)
 
-            MoreView()
+            MoreView(colorScheme: $colorScheme)
                 .tabItem { Label("More", systemImage: "ellipsis") }
                 .tag(4)
         }
         .preferredColorScheme(colorScheme)
     }
+}
+
+#Preview {
+    ContentView()
+}
+
+#Preview("Dark Mode") {
+    ContentView()
+        .preferredColorScheme(.dark)
+}
+
+#Preview("Light Mode") {
+    ContentView()
+        .preferredColorScheme(.light)
 }

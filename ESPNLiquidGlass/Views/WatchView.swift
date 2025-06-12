@@ -2,6 +2,8 @@ import SwiftUI
 
 struct WatchView: View {
     @State private var selectedCategory = "Also Live"
+    @State private var showSettings = false
+    @Binding var colorScheme: ColorScheme?
     let categories = ["Also Live", "Upcoming", "Top Videos", "Leagues", "Sports", "Recently Added"]
     
     var body: some View {
@@ -164,13 +166,46 @@ struct WatchView: View {
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {}) {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(.primary)
-                            .font(.system(size: 16, weight: .medium))
+                    HStack(spacing: 16) {
+                        Button(action: {}) {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundColor(.primary)
+                                .font(.system(size: 16, weight: .medium))
+                                .glowEffect(
+                                    color: .blue,
+                                    radius: 3,
+                                    intensity: .subtle,
+                                    pulsation: .none
+                                )
+                        }
+                        
+                        Button(action: { showSettings = true }) {
+                            Image(systemName: "gear")
+                                .foregroundColor(.primary)
+                                .font(.system(size: 16, weight: .medium))
+                                .glowEffect(
+                                    color: .gray,
+                                    radius: 3,
+                                    intensity: .subtle,
+                                    pulsation: .none
+                                )
+                        }
                     }
                 }
             }
+            .sheet(isPresented: $showSettings) {
+                SettingsView(colorScheme: $colorScheme)
+                    .preferredColorScheme(colorScheme)
+            }
         }
     }
+}
+
+#Preview {
+    WatchView(colorScheme: .constant(.dark))
+}
+
+#Preview("Dark Mode") {
+    WatchView(colorScheme: .constant(.dark))
+        .preferredColorScheme(.dark)
 }

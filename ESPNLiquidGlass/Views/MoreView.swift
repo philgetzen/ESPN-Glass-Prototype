@@ -2,6 +2,8 @@ import SwiftUI
 
 struct MoreView: View {
     @State private var selectedSportIndex = 0
+    @State private var showSettings = false
+    @Binding var colorScheme: ColorScheme?
     
     var body: some View {
         NavigationStack {
@@ -188,18 +190,36 @@ struct MoreView: View {
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {}) {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(.primary)
-                            .font(.system(size: 16, weight: .medium))
-                            .glowEffect(
-                                color: .blue,
-                                radius: 3,
-                                intensity: .subtle,
-                                pulsation: .none
-                            )
+                    HStack(spacing: 16) {
+                        Button(action: {}) {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundColor(.primary)
+                                .font(.system(size: 16, weight: .medium))
+                                .glowEffect(
+                                    color: .blue,
+                                    radius: 3,
+                                    intensity: .subtle,
+                                    pulsation: .none
+                                )
+                        }
+                        
+                        Button(action: { showSettings = true }) {
+                            Image(systemName: "gear")
+                                .foregroundColor(.primary)
+                                .font(.system(size: 16, weight: .medium))
+                                .glowEffect(
+                                    color: .gray,
+                                    radius: 3,
+                                    intensity: .subtle,
+                                    pulsation: .none
+                                )
+                        }
                     }
                 }
+            }
+            .sheet(isPresented: $showSettings) {
+                SettingsView(colorScheme: $colorScheme)
+                    .preferredColorScheme(colorScheme)
             }
         }
     }
@@ -231,4 +251,17 @@ struct SportDetailView: View {
         .background(Color.black)
         .navigationBarTitleDisplayMode(.inline)
     }
+}
+
+#Preview {
+    MoreView(colorScheme: .constant(.dark))
+}
+
+#Preview("Dark Mode") {
+    MoreView(colorScheme: .constant(.dark))
+        .preferredColorScheme(.dark)
+}
+
+#Preview("Sport Detail") {
+    SportDetailView(sport: .football)
 }

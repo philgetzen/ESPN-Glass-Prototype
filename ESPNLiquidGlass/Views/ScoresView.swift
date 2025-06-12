@@ -30,7 +30,7 @@ struct ScoresView: View {
                             }) {
                                 Text(event.text)
                                     .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(selectedLeague?.abbreviation == event.text ? .black : .white)
+                                    .foregroundColor(selectedLeague?.abbreviation == event.text ? .black : .primary)
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 8)
                                     .background(
@@ -43,7 +43,7 @@ struct ScoresView: View {
                     .padding(.horizontal)
                     .padding(.vertical, 12)
                 }
-                .background(Color.black)
+                .background(Color(UIColor.systemBackground))
                 
                 Divider()
                     .background(Color.gray.opacity(0.3))
@@ -55,7 +55,7 @@ struct ScoresView: View {
                             Text("FAVORITES")
                                 .font(.caption)
                                 .fontWeight(.semibold)
-                                .foregroundColor(.gray)
+                                .foregroundColor(.secondary)
                             
                             Spacer()
                             
@@ -76,7 +76,7 @@ struct ScoresView: View {
                             }
                         }
                     }
-                    .background(Color.black)
+                    .background(Color(UIColor.systemBackground))
                 }
                 
                 // League Section
@@ -85,7 +85,7 @@ struct ScoresView: View {
                         Text(selectedLeague?.abbreviation ?? selectedSport.rawValue.uppercased())
                             .font(.caption)
                             .fontWeight(.semibold)
-                            .foregroundColor(.gray)
+                            .foregroundColor(.secondary)
                         
                         Spacer()
                         
@@ -107,16 +107,37 @@ struct ScoresView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
-                .background(Color.black)
+                .background(Color(UIColor.systemBackground))
             }
             .background(Color.black)
-            .navigationTitle("Scores")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Image("ESPN_Logo")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(height: 24)
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {}) {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.primary)
+                            .font(.system(size: 16, weight: .medium))
+                            .glowEffect(
+                                color: .blue,
+                                radius: 3,
+                                intensity: .subtle,
+                                pulsation: .none
+                            )
+                    }
+                }
+                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {}) {
                         Image(systemName: "gear")
-                            .foregroundColor(.white)
+                            .foregroundColor(.primary)
+                            .font(.system(size: 16, weight: .medium))
                     }
                 }
             }
@@ -142,13 +163,13 @@ struct GameRow: View {
                     
                     Text(game.awayTeam.abbreviation)
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.white)
+                        .foregroundColor(.primary)
                     
                     Spacer()
                     
                     Text("\(game.awayScore)")
                         .font(.system(size: 18, weight: game.awayScore > game.homeScore ? .bold : .regular))
-                        .foregroundColor(game.awayScore > game.homeScore ? .white : .gray)
+                        .foregroundColor(game.awayScore > game.homeScore ? .primary : .secondary)
                 }
                 
                 // Home Team
@@ -162,13 +183,13 @@ struct GameRow: View {
                     
                     Text(game.homeTeam.abbreviation)
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.white)
+                        .foregroundColor(.primary)
                     
                     Spacer()
                     
                     Text("\(game.homeScore)")
                         .font(.system(size: 18, weight: game.homeScore > game.awayScore ? .bold : .regular))
-                        .foregroundColor(game.homeScore > game.awayScore ? .white : .gray)
+                        .foregroundColor(game.homeScore > game.awayScore ? .primary : .secondary)
                 }
             }
             
@@ -188,12 +209,12 @@ struct GameRow: View {
                 
                 Text(game.displayTime)
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(.secondary)
                 
                 if let broadcast = game.broadcastInfo {
                     Text(broadcast)
                         .font(.caption2)
-                        .foregroundColor(.gray)
+                        .foregroundColor(.secondary)
                 }
             }
             .frame(width: 80)

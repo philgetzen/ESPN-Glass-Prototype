@@ -178,8 +178,29 @@ struct MoreView: View {
                 }
             }
             .background(Color.black)
-            .navigationTitle("More")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Image("ESPN_Logo")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(height: 24)
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {}) {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.primary)
+                            .font(.system(size: 16, weight: .medium))
+                            .glowEffect(
+                                color: .blue,
+                                radius: 3,
+                                intensity: .subtle,
+                                pulsation: .none
+                            )
+                    }
+                }
+            }
         }
     }
 }

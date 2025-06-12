@@ -166,6 +166,21 @@ struct ESPNPlusView: View {
             .background(Color.black)
             .navigationTitle("ESPN+")
             .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {}) {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.primary)
+                            .font(.system(size: 16, weight: .medium))
+                            .glowEffect(
+                                color: .blue,
+                                radius: 3,
+                                intensity: .subtle,
+                                pulsation: .none
+                            )
+                    }
+                }
+            }
         }
     }
 }

@@ -16,21 +16,52 @@ struct ArticleDetailView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     // Hero Image/Video
-                    Rectangle()
-                        .fill(LinearGradient(
-                            colors: [Color.gray.opacity(0.3), Color.gray.opacity(0.1)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ))
-                        .aspectRatio(16/9, contentMode: .fit)
-                        .overlay(alignment: .center) {
-                            if article.type == .video {
-                                Image(systemName: "play.circle.fill")
-                                    .font(.system(size: 60))
-                                    .foregroundColor(.white)
-                                    .shadow(radius: 10)
+                    Group {
+                        if let imageURL = article.imageURL, let url = URL(string: imageURL) {
+                            AsyncImage(url: url) { image in
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                            } placeholder: {
+                                Rectangle()
+                                    .fill(LinearGradient(
+                                        colors: [Color.gray.opacity(0.3), Color.gray.opacity(0.1)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ))
+                                    .overlay(
+                                        ProgressView()
+                                            .progressViewStyle(CircularProgressViewStyle())
+                                    )
                             }
+                        } else {
+                            Rectangle()
+                                .fill(LinearGradient(
+                                    colors: [Color.gray.opacity(0.3), Color.gray.opacity(0.1)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ))
+                                .overlay(
+                                    VStack(spacing: 8) {
+                                        Image(systemName: article.type.icon)
+                                            .font(.system(size: 40))
+                                            .foregroundColor(.gray)
+                                        Text("No Image Available")
+                                            .font(.caption)
+                                            .foregroundColor(.gray)
+                                    }
+                                )
                         }
+                    }
+                    .aspectRatio(16/9, contentMode: .fit)
+                    .overlay(alignment: .center) {
+                        if article.type == .video {
+                            Image(systemName: "play.circle.fill")
+                                .font(.system(size: 60))
+                                .foregroundColor(.white)
+                                .shadow(radius: 10)
+                        }
+                    }
                     
                     VStack(alignment: .leading, spacing: 16) {
                         // Title
@@ -44,6 +75,49 @@ struct ArticleDetailView: View {
                             Text(subtitle)
                                 .font(.title3)
                                 .foregroundColor(.gray)
+                        }
+                        
+                        // Article metadata
+                        HStack {
+                            if article.isPremium {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "plus.circle.fill")
+                                        .font(.caption)
+                                    Text("ESPN+")
+                                        .font(.caption)
+                                        .fontWeight(.bold)
+                                }
+                                .foregroundStyle(
+                                    LinearGradient(
+                                        colors: [Color.blue, Color.purple],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                            }
+                            
+                            if let sport = article.sport {
+                                if article.isPremium {
+                                    Text("•")
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                }
+                                Text(sport.rawValue.uppercased())
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.red)
+                            }
+                            
+                            Spacer()
+                            
+                            Text(article.type.rawValue.uppercased())
+                                .font(.caption2)
+                                .fontWeight(.bold)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 2)
+                                .background(Color.gray.opacity(0.3))
+                                .cornerRadius(4)
+                                .foregroundColor(.white)
                         }
                         
                         // Author and Date
@@ -122,18 +196,60 @@ struct ArticleDetailView: View {
                             .background(Color.gray.opacity(0.3))
                         
                         // Article Content
-                        Text(article.content)
-                            .font(.body)
-                            .foregroundColor(.white.opacity(0.9))
-                            .lineSpacing(8)
-                        
-                        // Mock additional content
-                        ForEach(0..<3) { _ in
-                            Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.")
-                                .font(.body)
-                                .foregroundColor(.white.opacity(0.9))
-                                .lineSpacing(8)
-                                .padding(.top)
+                        VStack(alignment: .leading, spacing: 20) {
+                            if !article.content.isEmpty {
+                                Text(article.content)
+                                    .font(.body)
+                                    .foregroundColor(.white.opacity(0.9))
+                                    .lineSpacing(8)
+                            }
+                            
+                            // Read full article section
+                            VStack(alignment: .leading, spacing: 12) {
+                                HStack {
+                                    Rectangle()
+                                        .fill(Color.red)
+                                        .frame(width: 3, height: 20)
+                                    Text("Full Article")
+                                        .font(.headline)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.white)
+                                }
+                                
+                                Text("This is a preview. Read the complete article with in-depth analysis, quotes, and additional reporting on ESPN.com.")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                                    .lineSpacing(4)
+                                
+                                if let articleURL = article.articleURL, let url = URL(string: articleURL) {
+                                    Link(destination: url) {
+                                        HStack {
+                                            Text("Continue reading on ESPN.com")
+                                                .font(.subheadline)
+                                                .fontWeight(.semibold)
+                                            
+                                            Spacer()
+                                            
+                                            Image(systemName: "arrow.up.right")
+                                                .font(.subheadline)
+                                        }
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 16)
+                                        .padding(.vertical, 12)
+                                        .background(
+                                            LinearGradient(
+                                                colors: [Color.red, Color.red.opacity(0.8)],
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                        )
+                                        .cornerRadius(10)
+                                    }
+                                }
+                            }
+                            .padding(16)
+                            .background(Color.gray.opacity(0.1))
+                            .cornerRadius(12)
                         }
                         
                         // Related Teams

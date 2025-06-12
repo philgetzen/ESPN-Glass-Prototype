@@ -44,4 +44,22 @@ enum Sport: String, CaseIterable, Identifiable {
         case .mma: return .purple
         }
     }
+    
+    // Map ESPN API sport IDs to our Sport enum
+    static func fromAPIId(_ sportId: Int) -> Sport? {
+        switch sportId {
+        case 40: return .basketball  // NBA
+        case 46: return .basketball  // NCAAM
+        case 10: return .baseball    // MLB
+        case 20: return .football    // NFL
+        case 23: return .football    // NCAAF
+        case 90: return .hockey      // NHL
+        case 600: return .soccer     // Soccer
+        case 850: return .tennis     // Tennis
+        case 1100: return .golf      // Golf
+        case 32: return .boxing      // Boxing
+        case 3400: return .mma       // MMA
+        default: return nil
+        }
+    }
 }

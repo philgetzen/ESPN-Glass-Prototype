@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -18,9 +18,14 @@
 		627A2E1096375815715DC193 /* ESPNPlusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 284D808A25D67C72DFD01367 /* ESPNPlusView.swift */; };
 		77734226503B19848E001A4E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FEE66B13F686D18312E51EC /* ContentView.swift */; };
 		79F93FDF906B067BD88F6E73 /* WatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6578FCB89A50881CBFF650CF /* WatchView.swift */; };
+		8B4EC3292DFA68CF00A0F0FD /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4EC3282DFA68CF00A0F0FD /* SettingsView.swift */; };
 		97A6DD0F499A5EAFEFC3A037 /* MoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59FA27E5C8EB0662F63B4B20 /* MoreView.swift */; };
 		9B9D378DF72B0B039CAA04A0 /* ScoresView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB9650F17DB9016F4EEF37BD /* ScoresView.swift */; };
 		9C39DF3111BA9CD51451DD73 /* LiquidGlassEffects.swift in Sources */ = {isa = PBXBuildFile; fileRef = C08CCE6AAC952D4BAF444B4D /* LiquidGlassEffects.swift */; };
+		8B4EC32E2DFA6C0000A0F0FD /* ESPNAPIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4EC32F2DFA6C0000A0F0FD /* ESPNAPIModels.swift */; };
+		8B4EC3302DFA6C0100A0F0FD /* ESPNAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4EC3312DFA6C0100A0F0FD /* ESPNAPIService.swift */; };
+		8B4EC3332DFA6D0000A0F0FD /* VideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4EC3342DFA6D0000A0F0FD /* VideoPlayerView.swift */; };
+		8B4EC32C2DFA6B8200A0F0FD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B4EC32B2DFA6B8200A0F0FD /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,13 +39,19 @@
 		584D8656564BB767AB2AC265 /* Game.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Game.swift; sourceTree = "<group>"; };
 		59FA27E5C8EB0662F63B4B20 /* MoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreView.swift; sourceTree = "<group>"; };
 		5E007CCA90396BD189C274B2 /* League.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = League.swift; sourceTree = "<group>"; };
-		62C0BA29358983FDB7E51123 /* .gitignore */ = {isa = PBXFileReference; path = .gitignore; sourceTree = "<group>"; };
+		62C0BA29358983FDB7E51123 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		641A7F75C745482FF48C2723 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		6578FCB89A50881CBFF650CF /* WatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchView.swift; sourceTree = "<group>"; };
+		8B4EC3282DFA68CF00A0F0FD /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		8B4EC32A2DFA6B0D00A0F0FD /* ESPN_Logo.svg */ = {isa = PBXFileReference; lastKnownFileType = text; path = ESPN_Logo.svg; sourceTree = "<group>"; };
+		8B4EC32B2DFA6B8200A0F0FD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9A5A71C2D41226D0ECBB7B96 /* ESPNLiquidGlassApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ESPNLiquidGlassApp.swift; sourceTree = "<group>"; };
 		AB9650F17DB9016F4EEF37BD /* ScoresView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoresView.swift; sourceTree = "<group>"; };
 		C08CCE6AAC952D4BAF444B4D /* LiquidGlassEffects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidGlassEffects.swift; sourceTree = "<group>"; };
-		D20D399CC915C46B129E7648 /* ESPNLiquidGlass.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ESPNLiquidGlass.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8B4EC32F2DFA6C0000A0F0FD /* ESPNAPIModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ESPNAPIModels.swift; sourceTree = "<group>"; };
+		8B4EC3312DFA6C0100A0F0FD /* ESPNAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ESPNAPIService.swift; sourceTree = "<group>"; };
+		8B4EC3342DFA6D0000A0F0FD /* VideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerView.swift; sourceTree = "<group>"; };
+		D20D399CC915C46B129E7648 /* ESPNLiquidGlass.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ESPNLiquidGlass.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -68,10 +79,19 @@
 			path = Utils;
 			sourceTree = "<group>";
 		};
+		8B4EC3322DFA6C0200A0F0FD /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				8B4EC3312DFA6C0100A0F0FD /* ESPNAPIService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
 		6B96048EF944C723321CB35C /* Models */ = {
 			isa = PBXGroup;
 			children = (
 				556590EA581829C64AAD8E75 /* Article.swift */,
+				8B4EC32F2DFA6C0000A0F0FD /* ESPNAPIModels.swift */,
 				584D8656564BB767AB2AC265 /* Game.swift */,
 				5E007CCA90396BD189C274B2 /* League.swift */,
 				39CFE7F73A5CEB28DD2988D3 /* Sport.swift */,
@@ -83,12 +103,14 @@
 		8C8120A40B010B3BBCD463BF /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				8B4EC3282DFA68CF00A0F0FD /* SettingsView.swift */,
 				50509C1FEAE73A8195BBD35A /* ArticleDetailView.swift */,
 				3FEE66B13F686D18312E51EC /* ContentView.swift */,
 				284D808A25D67C72DFD01367 /* ESPNPlusView.swift */,
 				05218E1B35D013C2388C322E /* HomeView.swift */,
 				59FA27E5C8EB0662F63B4B20 /* MoreView.swift */,
 				AB9650F17DB9016F4EEF37BD /* ScoresView.swift */,
+				8B4EC3342DFA6D0000A0F0FD /* VideoPlayerView.swift */,
 				6578FCB89A50881CBFF650CF /* WatchView.swift */,
 			);
 			path = Views;
@@ -97,12 +119,15 @@
 		B3AA3FAD822A8041662D358A /* ESPNLiquidGlass */ = {
 			isa = PBXGroup;
 			children = (
+				8B4EC32A2DFA6B0D00A0F0FD /* ESPN_Logo.svg */,
 				62C0BA29358983FDB7E51123 /* .gitignore */,
 				641A7F75C745482FF48C2723 /* Info.plist */,
 				FBCF17A5201B830FC53777AD /* App */,
 				6B96048EF944C723321CB35C /* Models */,
+				8B4EC3322DFA6C0200A0F0FD /* Services */,
 				3C922A91825F840B3E279FB7 /* Utils */,
 				8C8120A40B010B3BBCD463BF /* Views */,
+				8B4EC32B2DFA6B8200A0F0FD /* Assets.xcassets */,
 			);
 			path = ESPNLiquidGlass;
 			sourceTree = "<group>";
@@ -123,6 +148,7 @@
 			buildConfigurationList = 49D22B914BEFAFA99834337A /* Build configuration list for PBXNativeTarget "ESPNLiquidGlass" */;
 			buildPhases = (
 				8056A507B85DADEC4A4B7F60 /* Sources */,
+				8B4EC32D2DFA6B8300A0F0FD /* Resources */,
 			);
 			buildRules = (
 			);
@@ -142,7 +168,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1430;
+				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					581FA126ED5933C27A8D22F3 = {
 						DevelopmentTeam = "";
@@ -159,7 +185,6 @@
 			);
 			mainGroup = 04EF83CAD2910A6E1A981C7A;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 54;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -173,6 +198,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B4EC3292DFA68CF00A0F0FD /* SettingsView.swift in Sources */,
 				600C27D05B56464CC0DF27AA /* Article.swift in Sources */,
 				1978136D96DFA7845AA5D83D /* ArticleDetailView.swift in Sources */,
 				77734226503B19848E001A4E /* ContentView.swift in Sources */,
@@ -187,10 +213,24 @@
 				188BDA23F897ECCE41B17152 /* Sport.swift in Sources */,
 				1AFD54C73D97E8004BAB2AB7 /* Team.swift in Sources */,
 				79F93FDF906B067BD88F6E73 /* WatchView.swift in Sources */,
+				8B4EC32E2DFA6C0000A0F0FD /* ESPNAPIModels.swift in Sources */,
+				8B4EC3302DFA6C0100A0F0FD /* ESPNAPIService.swift in Sources */,
+				8B4EC3332DFA6D0000A0F0FD /* VideoPlayerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXResourcesBuildPhase section */
+		8B4EC32D2DFA6B8300A0F0FD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8B4EC32C2DFA6B8200A0F0FD /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
 		1E3666737A5CABA40979411D /* Debug */ = {
@@ -199,6 +239,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = ESPNLiquidGlass/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -249,6 +290,7 @@
 				DEVELOPMENT_TEAM = "";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -257,12 +299,13 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 6.0;
@@ -275,6 +318,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = ESPNLiquidGlass/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -325,6 +369,7 @@
 				DEVELOPMENT_TEAM = "";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -339,13 +384,14 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 6.0;

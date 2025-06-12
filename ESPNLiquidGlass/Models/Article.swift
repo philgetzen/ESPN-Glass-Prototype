@@ -1,11 +1,11 @@
 import Foundation
 import SwiftUI
 
-enum ArticleType {
-    case news
-    case video
-    case podcast
-    case analysis
+enum ArticleType: String, CaseIterable {
+    case news = "News"
+    case video = "Video"
+    case podcast = "Podcast"
+    case analysis = "Analysis"
     
     var icon: String {
         switch self {
@@ -22,7 +22,7 @@ enum ArticleType {
 }
 
 struct Article: Identifiable {
-    let id = UUID()
+    let id: UUID
     let title: String
     let subtitle: String?
     let author: String
@@ -35,11 +35,104 @@ struct Article: Identifiable {
     let relatedTeams: [Team]
     let likes: Int
     let comments: Int
+    let isPremium: Bool
+    let articleURL: String?
+    let videoURL: String?
     
     var formattedDate: String {
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .abbreviated
         return formatter.localizedString(for: publishedDate, relativeTo: Date())
+    }
+    
+    // Initialize from API response
+    init(from newsArticle: NewsArticle) {
+        self.id = UUID()
+        self.title = newsArticle.headline ?? "Untitled"
+        self.subtitle = newsArticle.description
+        self.author = newsArticle.byline ?? "ESPN"
+        
+        // Parse date from ISO string
+        if let publishedString = newsArticle.published {
+            let formatter = ISO8601DateFormatter()
+            self.publishedDate = formatter.date(from: publishedString) ?? Date()
+        } else {
+            self.publishedDate = Date()
+        }
+        
+        // Get the first image URL
+        self.imageURL = newsArticle.images?.first?.url
+        
+        // Content from description or empty
+        self.content = newsArticle.description ?? ""
+        
+        // Determine type based on API type field and video content
+        if let video = newsArticle.video, !video.isEmpty {
+            self.type = .video
+        } else if let apiType = newsArticle.type?.lowercased() {
+            if apiType.contains("video") {
+                self.type = .video
+            } else if apiType.contains("podcast") {
+                self.type = .podcast
+            } else if apiType.contains("analysis") || apiType.contains("story") {
+                self.type = .analysis
+            } else {
+                self.type = .news
+            }
+        } else {
+            self.type = .news
+        }
+        
+        // Estimate read time based on content length
+        let wordCount = (newsArticle.description ?? "").split(separator: " ").count
+        self.readTime = max(1, wordCount / 200) // Assuming 200 words per minute
+        
+        // Get sport from categories
+        if let category = newsArticle.categories?.first,
+           let sportId = category.sportId {
+            self.sport = Sport.fromAPIId(sportId)
+        } else {
+            self.sport = nil
+        }
+        
+        self.relatedTeams = []
+        
+        // Random engagement numbers for now (in real app, these would come from API)
+        self.likes = Int.random(in: 100...10000)
+        self.comments = Int.random(in: 10...1000)
+        
+        self.isPremium = newsArticle.premium ?? false
+        self.articleURL = newsArticle.links?.web?.href
+        
+        // Extract video URL if available
+        if let video = newsArticle.video?.first {
+            self.videoURL = video.links?.source?.href
+        } else {
+            self.videoURL = nil
+        }
+    }
+    
+    // Manual initializer for mock data
+    init(id: UUID = UUID(), title: String, subtitle: String?, author: String, publishedDate: Date, 
+         imageURL: String?, content: String, type: ArticleType, readTime: Int,
+         sport: Sport?, relatedTeams: [Team], likes: Int, comments: Int,
+         isPremium: Bool = false, articleURL: String? = nil, videoURL: String? = nil) {
+        self.id = id
+        self.title = title
+        self.subtitle = subtitle
+        self.author = author
+        self.publishedDate = publishedDate
+        self.imageURL = imageURL
+        self.content = content
+        self.type = type
+        self.readTime = readTime
+        self.sport = sport
+        self.relatedTeams = relatedTeams
+        self.likes = likes
+        self.comments = comments
+        self.isPremium = isPremium
+        self.articleURL = articleURL
+        self.videoURL = videoURL
     }
 }
 

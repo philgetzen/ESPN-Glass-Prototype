@@ -154,13 +154,20 @@ struct WatchView: View {
                 .padding(.vertical)
             }
             .background(Color.black)
-            .navigationTitle("Watch")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Image("ESPN_Logo")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(height: 24)
+                }
+                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {}) {
                         Image(systemName: "magnifyingglass")
-                            .foregroundColor(.white)
+                            .foregroundColor(.primary)
+                            .font(.system(size: 16, weight: .medium))
                     }
                 }
             }

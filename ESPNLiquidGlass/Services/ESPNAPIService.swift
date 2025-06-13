@@ -97,5 +97,96 @@ final class ESPNAPIService: Sendable {
             throw APIError.networkError(error)
         }
     }
+    
+    // Fetch scores for a specific date
+    func fetchScoresForDate(_ date: Date, sports: [String]) async -> [SportGameData] {
+        var allSportsData: [SportGameData] = []
+        
+        // Format date for API
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyyMMdd"
+        let dateString = formatter.string(from: date)
+        
+        await withTaskGroup(of: SportGameData?.self) { group in
+            for sport in sports {
+                group.addTask {
+                    await self.fetchSportScores(sport: sport, date: dateString)
+                }
+            }
+            
+            for await sportData in group {
+                if let sportData = sportData {
+                    allSportsData.append(sportData)
+                }
+            }
+        }
+        
+        // Sort by sport priority
+        let sportOrder = ["NFL", "NBA", "MLB", "NHL", "NCAAF", "NCAAM", "WNBA", "MLS", "PGA"]
+        allSportsData.sort { sport1, sport2 in
+            let index1 = sportOrder.firstIndex(of: sport1.leagueAbbreviation) ?? sportOrder.count
+            let index2 = sportOrder.firstIndex(of: sport2.leagueAbbreviation) ?? sportOrder.count
+            return index1 < index2
+        }
+        
+        return allSportsData
+    }
+    
+    private func fetchSportScores(sport: String, date: String) async -> SportGameData? {
+        let urlString: String
+        
+        switch sport.lowercased() {
+        case "nba":
+            urlString = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?dates=\(date)"
+        case "nfl":
+            urlString = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates=\(date)"
+        case "mlb":
+            urlString = "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard?dates=\(date)"
+        case "nhl":
+            urlString = "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard?dates=\(date)"
+        case "wnba":
+            urlString = "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/scoreboard?dates=\(date)"
+        case "ncaaf":
+            urlString = "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?dates=\(date)&groups=80"
+        case "ncaam":
+            urlString = "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard?dates=\(date)&groups=50"
+        case "mls":
+            urlString = "https://site.api.espn.com/apis/site/v2/sports/soccer/usa.1/scoreboard?dates=\(date)"
+        default:
+            return nil
+        }
+        
+        guard let url = URL(string: urlString) else { return nil }
+        
+        do {
+            let (data, _) = try await session.data(from: url)
+            let response = try decoder.decode(ScoreboardResponse.self, from: data)
+            
+            guard let events = response.events, !events.isEmpty else { return nil }
+            
+            return SportGameData(
+                league: sport,
+                leagueName: sport.uppercased(),
+                leagueAbbreviation: sport.uppercased(),
+                icon: getSportIcon(for: sport),
+                events: events
+            )
+        } catch {
+            print("Error fetching \(sport) scores: \(error)")
+            return nil
+        }
+    }
+    
+    private func getSportIcon(for sport: String) -> String {
+        switch sport.uppercased() {
+        case "NBA", "WNBA", "NCAAM": return "basketball"
+        case "NFL", "NCAAF": return "football"
+        case "MLB": return "baseball"
+        case "NHL": return "hockey.puck"
+        case "MLS": return "soccerball"
+        case "PGA": return "figure.golf"
+        default: return "sportscourt"
+        }
+    }
 }
 

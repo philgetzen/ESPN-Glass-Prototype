@@ -60,8 +60,8 @@ struct Article: Identifiable {
             self.publishedDate = Date()
         }
         
-        // Get the first image URL
-        self.imageURL = newsArticle.images?.first?.url
+        // Get the best 16:9 image URL, fallback to first available
+        self.imageURL = Self.selectBest16x9Image(from: newsArticle.images)
         
         // Content from description or empty
         self.content = newsArticle.description ?? ""
@@ -133,6 +133,42 @@ struct Article: Identifiable {
         self.isPremium = isPremium
         self.articleURL = articleURL
         self.videoURL = videoURL
+    }
+    
+    // Smart image selection to prefer 16:9 aspect ratio images
+    private static func selectBest16x9Image(from images: [NewsArticle.ArticleImage]?) -> String? {
+        guard let images = images, !images.isEmpty else { return nil }
+        
+        // First, try to find images with 16:9 aspect ratio based on dimensions
+        for image in images {
+            if let width = image.width, let height = image.height, width > 0, height > 0 {
+                let aspectRatio = Double(width) / Double(height)
+                // Check if aspect ratio is close to 16:9 (1.777...)
+                if abs(aspectRatio - 16.0/9.0) < 0.1 {
+                    return image.url
+                }
+            }
+        }
+        
+        // Second, try to find images with _16-9 in the URL
+        for image in images {
+            if let url = image.url, url.contains("_16-9") {
+                return url
+            }
+        }
+        
+        // Third, prefer larger images (likely better quality)
+        let sortedImages = images.compactMap { image -> (NewsArticle.ArticleImage, Int)? in
+            guard let width = image.width, let height = image.height else { return nil }
+            return (image, width * height)
+        }.sorted { $0.1 > $1.1 }
+        
+        if let bestImage = sortedImages.first {
+            return bestImage.0.url
+        }
+        
+        // Fallback to first available image
+        return images.first?.url
     }
 }
 

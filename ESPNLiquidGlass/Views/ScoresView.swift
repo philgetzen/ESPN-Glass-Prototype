@@ -6,6 +6,7 @@ struct ScoresView: View {
     @State private var selectedSports: Set<String> = ["Top Events"]
     @State private var isLoading = false
     @State private var showSettings = false
+    @State private var currentWeekOffset = 0
     @Binding var colorScheme: ColorScheme?
     
     private let apiService = ESPNAPIService.shared
@@ -26,13 +27,6 @@ struct ScoresView: View {
         return ["Top Events"] + sportsWithGames + sportsWithoutGames
     }
     
-    // Generate dates for the week view
-    private var weekDates: [Date] {
-        let calendar = Calendar.current
-        return (-3...3).compactMap { offset in
-            calendar.date(byAdding: .day, value: offset, to: Date())
-        }
-    }
     
     var filteredSportsData: [SportGameData] {
         if selectedSports.contains("Top Events") {
@@ -55,8 +49,6 @@ struct ScoresView: View {
                 // Sport filter toggles
                 sportToggles
                 
-                Divider()
-                
                 // Games list
                 if isLoading {
                     Spacer()
@@ -74,16 +66,28 @@ struct ScoresView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    ScrollView {
-                        LazyVStack(spacing: 20) {
-                            ForEach(filteredSportsData, id: \.league) { sportData in
-                                GamesList(sportData: sportData)
-                            }
+                    List {
+                        ForEach(filteredSportsData, id: \.league) { sportData in
+                            GamesList(sportData: sportData)
+                                .listRowInsets(EdgeInsets(top: 12, leading: 0, bottom: 12, trailing: 0))
+                                .listRowSeparator(.hidden)
+                                .listRowBackground(Color.clear)
                         }
-                        .padding(.vertical)
                     }
+                    .listStyle(.plain)
+                    .background(
+                        Color(UIColor.systemGroupedBackground)
+                            .glowEffect(
+                                color: .gray,
+                                radius: 5,
+                                intensity: .subtle,
+                                pulsation: .none
+                            )
+                    )
+                    .scrollContentBackground(.hidden)
                 }
             }
+            .background(Color(UIColor.systemGroupedBackground))
             .navigationTitle("Scores")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -122,27 +126,118 @@ struct ScoresView: View {
     }
     
     private var dateSlider: some View {
-        ScrollViewReader { proxy in
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 0) {
-                    ForEach(weekDates, id: \.self) { date in
-                        DateButton(date: date, isSelected: Calendar.current.isDate(date, inSameDayAs: selectedDate))
-                            .id(date)
-                            .onTapGesture {
-                                selectedDate = date
-                                Task {
-                                    await loadScores()
-                                }
-                            }
-                    }
+        HStack(spacing: 0) {
+            // Left arrow with glass gradient
+            Button(action: {
+                withAnimation(.easeInOut(duration: 0.8)) {
+                    currentWeekOffset -= 1
                 }
-                .padding(.horizontal)
+            }) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.primary.opacity(0.9))
+                    .frame(width: 44, height: 44)
             }
-            .padding(.vertical, 8)
-            .background(Color(UIColor.systemBackground))
-            .onAppear {
-                proxy.scrollTo(selectedDate, anchor: .center)
+            
+            // TabView for smooth horizontal sliding
+            TabView(selection: $currentWeekOffset) {
+                ForEach(-10...10, id: \.self) { weekOffset in
+                    weekView(for: weekOffset)
+                        .tag(weekOffset)
+                }
             }
+            .tabViewStyle(.page(indexDisplayMode: .never))
+            .frame(height: 70)
+            .frame(maxWidth: .infinity)
+            .animation(.easeInOut(duration: 0.6), value: currentWeekOffset)
+            .onChange(of: currentWeekOffset) { oldOffset, newOffset in
+                updateSelectedDateForCurrentWeek()
+                Task {
+                    await loadScores()
+                }
+            }
+            
+            // Right arrow with glass gradient
+            Button(action: {
+                withAnimation(.easeInOut(duration: 0.8)) {
+                    currentWeekOffset += 1
+                }
+            }) {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.primary.opacity(0.9))
+                    .frame(width: 44, height: 44)
+            }
+        }
+        .padding(.vertical, 8)
+        .background(Color(UIColor.systemBackground))
+        .overlay(alignment: .leading) {
+            // Left edge glass mask
+            Rectangle()
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color(UIColor.systemBackground),
+                            Color(UIColor.systemBackground).opacity(0.8),
+                            Color.clear
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .frame(width: 44)
+                .allowsHitTesting(false) // Allow taps to pass through
+        }
+        .overlay(alignment: .trailing) {
+            // Right edge glass mask
+            Rectangle()
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color.clear,
+                            Color(UIColor.systemBackground).opacity(0.8),
+                            Color(UIColor.systemBackground)
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .frame(width: 44)
+                .allowsHitTesting(false) // Allow taps to pass through
+        }
+        .onAppear {
+            // Initialize with today's date centered
+            initializeSelectedDate()
+        }
+    }
+    
+    private func weekView(for weekOffset: Int) -> some View {
+        let weekDates = generateWeekDates(for: weekOffset)
+        
+        return HStack(spacing: 0) {
+            ForEach(weekDates, id: \.self) { date in
+                DateButton(date: date, isSelected: Calendar.current.isDate(date, inSameDayAs: selectedDate))
+                    .frame(minWidth: 50, maxWidth: .infinity) // Prevent smooshing with min/max width
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            selectedDate = date
+                        }
+                        Task {
+                            await loadScores()
+                        }
+                    }
+            }
+        }
+        .padding(.horizontal)
+    }
+    
+    private func generateWeekDates(for weekOffset: Int) -> [Date] {
+        let calendar = Calendar.current
+        let today = Date()
+        let baseDate = calendar.date(byAdding: .weekOfYear, value: weekOffset, to: today) ?? today
+        
+        return (-3...3).compactMap { dayOffset in
+            calendar.date(byAdding: .day, value: dayOffset, to: baseDate)
         }
     }
     
@@ -189,12 +284,39 @@ struct ScoresView: View {
     private func loadScores() async {
         isLoading = true
         
-        let sports = selectedSports.contains("Top Events") ? nil : Array(selectedSports)
+        let sports = selectedSports.contains("Top Events") ? ["NBA", "WNBA", "PGA", "MLB", "NHL", "NCAAF", "NCAAM", "MLS"] : Array(selectedSports)
         let data = await apiService.fetchScoresForDate(selectedDate, sports: sports)
         
         await MainActor.run {
-            self.sportsData = data
-            self.isLoading = false
+            withAnimation(.easeInOut(duration: 0.3)) {
+                self.sportsData = data
+                self.isLoading = false
+            }
+        }
+    }
+    
+    private func initializeSelectedDate() {
+        // Start with today's date, which should be in the center of the current week
+        let today = Date()
+        selectedDate = today
+        currentWeekOffset = 0
+    }
+    
+    private func updateSelectedDateForCurrentWeek() {
+        let calendar = Calendar.current
+        let today = Date()
+        
+        // Calculate the new base date for the current week offset
+        if let newBaseDate = calendar.date(byAdding: .weekOfYear, value: currentWeekOffset, to: today) {
+            // Try to maintain the same day of week, or fallback to the center date
+            let currentDayOfWeek = calendar.component(.weekday, from: selectedDate)
+            let newBaseDayOfWeek = calendar.component(.weekday, from: newBaseDate)
+            
+            if let newSelectedDate = calendar.date(byAdding: .day, value: currentDayOfWeek - newBaseDayOfWeek, to: newBaseDate) {
+                selectedDate = newSelectedDate
+            } else {
+                selectedDate = newBaseDate
+            }
         }
     }
 }
@@ -224,7 +346,7 @@ struct DateButton: View {
             Text(dayOfWeek)
                 .font(.caption2)
                 .fontWeight(.medium)
-                .foregroundColor(isSelected ? .white : (isToday ? .red : .secondary))
+                .foregroundColor(isSelected ? .white : .secondary)
             
             Text(dayNumber)
                 .font(.title3)
@@ -234,11 +356,18 @@ struct DateButton: View {
         .frame(width: 50, height: 60)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(isSelected ? Color.red : Color.clear)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(isToday && !isSelected ? Color.red : Color.clear, lineWidth: 1)
+                .fill(
+                    isSelected ? Color.red : 
+                    (isToday ? Color.white.opacity(0.1) : Color.clear)
+                )
+                .padding(.horizontal, isToday && !isSelected ? 3 : 0)
+                .glowEffect(
+                    color: isSelected ? .red : .clear,
+                    radius: 4,
+                    intensity: isSelected ? .medium : .subtle,
+                    pulsation: .none
+                )
+                .shadow(color: isSelected ? .red.opacity(0.3) : .clear, radius: 4, x: 0, y: 2)
         )
     }
 }
@@ -262,7 +391,14 @@ struct SportToggle: View {
             .padding(.vertical, 6)
             .background(
                 Capsule()
-                    .fill(isSelected ? Color.yellow : Color.gray.opacity(0.2))
+                    .fill(isSelected ? Color.yellow : Color.gray.opacity(0.15))
+                    .glowEffect(
+                        color: isSelected ? .yellow : .clear,
+                        radius: 3,
+                        intensity: isSelected ? .medium : .subtle,
+                        pulsation: .none
+                    )
+                    .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
             )
             .opacity(hasGames || sport == "Top Events" ? 1.0 : 0.6)
         }
@@ -286,25 +422,78 @@ struct GamesList: View {
     let sportData: SportGameData
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Section Header
-            HStack {
-                Text(sportData.leagueName)
-                    .font(.headline)
-                    .foregroundColor(.primary)
-                
-                Spacer()
-            }
-            .padding(.horizontal)
-            .padding(.bottom, 8)
-            
-            // Games List
-            VStack(spacing: 12) {
-                ForEach(sportData.events, id: \.id) { event in
-                    GameCard(event: event, league: sportData.leagueAbbreviation)
+        VStack(spacing: 0) {
+            // Section with both header and games in one rounded container
+            VStack(spacing: 0) {
+                // Section Header
+                HStack {
+                    Text(sportData.leagueAbbreviation)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.primary.opacity(0.8))
+                    
+                    Spacer()
+                    
+                    Button(action: {}) {
+                        Text("See All")
+                            .font(.system(size: 13))
+                            .foregroundColor(.blue)
+                    }
                 }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(
+                    LinearGradient(
+                        colors: [
+                            Color(UIColor.tertiarySystemBackground),
+                            Color(UIColor.secondarySystemBackground).opacity(0.8)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .overlay(
+                    Rectangle()
+                        .frame(height: 1)
+                        .foregroundColor(Color.primary.opacity(0.15))
+                        .shadow(color: .black.opacity(0.1), radius: 0.5, x: 0, y: 0.5),
+                    alignment: .bottom
+                )
+                
+                // Games List
+                LazyVStack(spacing: 0) {
+                    ForEach(sportData.events.indices, id: \.self) { index in
+                        GameCard(event: sportData.events[index], league: sportData.leagueAbbreviation)
+                            .id("\(sportData.league)-\(sportData.events[index].id ?? "\(index)")")
+                        
+                        if index < sportData.events.count - 1 {
+                            Rectangle()
+                                .frame(height: 1)
+                                .foregroundColor(Color.primary.opacity(0.12))
+                                .padding(.horizontal, 16)
+                                .shadow(color: .black.opacity(0.1), radius: 0.5, x: 0, y: 0.5)
+                        }
+                    }
+                }
+                .background(Color(UIColor.systemBackground))
             }
-            .padding(.horizontal)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color(UIColor.systemBackground))
+                    .glowEffect(
+                        color: .gray,
+                        radius: 3,
+                        intensity: .medium,
+                        pulsation: .none
+                    )
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(Color.primary.opacity(0.15), lineWidth: 1)
+            )
+            .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
+            .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+            .padding(.horizontal, 16)
         }
     }
 }
@@ -326,30 +515,45 @@ struct GameCard: View {
     }
     
     private var statusText: String {
-        if let status = event.status {
-            if event.isLive {
-                // Show detailed live status with period/quarter info
-                if let displayClock = status.displayClock, !displayClock.isEmpty {
-                    if let period = status.period, period > 0 {
-                        let periodText = getPeriodText(for: league, period: period)
-                        return "\(displayClock) \(periodText)"
-                    }
-                    return displayClock
-                }
-                return "LIVE"
-            } else if event.isUpcoming {
-                return formatGameTime()
-            } else if event.isFinal {
-                // Check for overtime or specific final status
-                if let detail = status.type?.detail, detail.contains("OT") {
-                    return detail
-                } else if let shortDetail = status.type?.shortDetail, shortDetail != "Final" {
-                    return shortDetail
-                }
-                return "Final"
-            }
+        guard let status = event.status else { return formatGameTime() }
+        
+        if event.isLive {
+            return status.displayClock ?? "LIVE"
+        } else if event.isUpcoming {
+            return formatGameTime()
+        } else if event.isFinal {
+            return status.type?.shortDetail ?? "Final"
         }
         return formatGameTime()
+    }
+    
+    @ViewBuilder
+    private var gameStateBadge: some View {
+        if event.isLive {
+            Text("LIVE")
+                .font(.system(size: 8, weight: .bold))
+                .foregroundColor(.white)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(
+                    Capsule()
+                        .fill(Color.red)
+                        .glowEffect(
+                            color: .red,
+                            radius: 2,
+                            intensity: .medium,
+                            pulsation: .gentle
+                        )
+                )
+        } else {
+            // Empty space to maintain layout consistency
+            Color.clear
+                .frame(height: 16)
+        }
+    }
+    
+    private var networkInfo: String? {
+        event.competitions?.first?.broadcasts?.first?.names?.first
     }
     
     private func getPeriodText(for league: String, period: Int) -> String {
@@ -396,12 +600,20 @@ struct GameCard: View {
     private func formatGameTime() -> String {
         guard let dateString = event.date else { return "" }
         
-        let formatter = ISO8601DateFormatter()
+        // Use a simple DateFormatter for the ESPN format we saw in logs: 2025-06-14T00:30Z
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm'Z'"
+        formatter.timeZone = TimeZone(abbreviation: "UTC")
+        
         guard let date = formatter.date(from: dateString) else { return "" }
         
         let timeFormatter = DateFormatter()
         timeFormatter.dateFormat = "h:mm a"
-        return timeFormatter.string(from: date)
+        timeFormatter.timeZone = TimeZone.current
+        let timeString = timeFormatter.string(from: date)
+        
+        // Remove leading zero from hour
+        return timeString.replacingOccurrences(of: "^0", with: "", options: .regularExpression)
     }
     
     private func isRecentGame() -> Bool {
@@ -419,155 +631,177 @@ struct GameCard: View {
     
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Game status bar
-            HStack {
-                if event.isLive {
-                    HStack(spacing: 4) {
-                        Circle()
-                            .fill(Color.red)
-                            .frame(width: 6, height: 6)
-                        Text("LIVE")
-                            .font(.caption2)
-                            .fontWeight(.bold)
-                            .foregroundColor(.red)
-                        
-                        if statusText != "LIVE" {
-                            Text("•")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                            Text(statusText)
-                                .font(.caption2)
-                                .fontWeight(.medium)
-                                .foregroundColor(.primary)
-                        }
-                    }
-                } else if event.isUpcoming {
-                    HStack(spacing: 4) {
-                        Text("UPCOMING")
-                            .font(.caption2)
-                            .fontWeight(.bold)
-                            .foregroundColor(.orange)
-                        Text("•")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                        Text(statusText)
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                    }
-                } else if event.isFinal {
-                    HStack(spacing: 4) {
-                        Text(statusText)
-                            .font(.caption2)
-                            .fontWeight(.medium)
-                            .foregroundColor(.secondary)
-                        
-                        // Show replay indicator for recent games
-                        if isRecentGame() {
-                            Text("•")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                            Text("REPLAY")
-                                .font(.caption2)
-                                .fontWeight(.bold)
-                                .foregroundColor(.blue)
-                        }
-                    }
-                } else {
-                    Text(statusText)
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                }
-                
-                Spacer()
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
-            .background(Color.gray.opacity(0.1))
-            
-            // Teams and scores
-            VStack(spacing: 12) {
+        HStack(alignment: .top, spacing: 0) {
+            // Teams and scores section
+            VStack(spacing: 0) {
                 // Away team
                 teamRow(team: awayTeam, isWinner: awayTeam?.winner == true)
+                    .padding(.vertical, 12)
                 
                 // Home team  
                 teamRow(team: homeTeam, isWinner: homeTeam?.winner == true)
+                    .padding(.vertical, 12)
             }
-            .padding(16)
-            .background(Color(UIColor.systemBackground))
+            .frame(maxWidth: .infinity)
+            
+            // Game status/time section - aligned with first team
+            VStack(alignment: .trailing, spacing: 2) {
+                if event.isLive {
+                    // Live badge
+                    gameStateBadge
+                    
+                    // Live status
+                    Text(statusText)
+                        .font(.system(size: 11))
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                        .multilineTextAlignment(.trailing)
+                } else if event.isUpcoming {
+                    // Start time
+                    let gameTime = formatGameTime()
+                    Text(gameTime.isEmpty ? "TBD" : gameTime)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.primary)
+                        .multilineTextAlignment(.trailing)
+                    
+                    // Network if available
+                    if let network = networkInfo {
+                        Text(network)
+                            .font(.system(size: 10))
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.trailing)
+                    }
+                } else if event.isFinal {
+                    // Final status
+                    Text(statusText)
+                        .font(.system(size: 11))
+                        .fontWeight(.medium)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.trailing)
+                    
+                    // Network or replay indicator for recent games
+                    if isRecentGame() {
+                        Text("REPLAY")
+                            .font(.system(size: 9))
+                            .fontWeight(.bold)
+                            .foregroundColor(.blue)
+                            .multilineTextAlignment(.trailing)
+                    } else if let network = networkInfo {
+                        Text(network)
+                            .font(.system(size: 10))
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.trailing)
+                    }
+                } else {
+                    // Fallback - show time regardless of status
+                    let gameTime = formatGameTime()
+                    Text(gameTime.isEmpty ? "TBD" : gameTime)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.primary)
+                        .multilineTextAlignment(.trailing)
+                    
+                    // Network if available
+                    if let network = networkInfo {
+                        Text(network)
+                            .font(.system(size: 10))
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.trailing)
+                    }
+                }
+            }
+            .frame(width: 80)
+            .padding(.horizontal, 8)
+            .padding(.top, 12) // Align with first team
         }
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(
+            Rectangle()
+                .fill(Color(UIColor.systemBackground))
+                .glowEffect(
+                    color: event.isLive ? .red : .clear,
+                    radius: 2,
+                    intensity: event.isLive ? .medium : .subtle,
+                    pulsation: event.isLive ? .gentle : .none
+                )
+        )
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+            Rectangle()
+                .fill(Color.clear)
+                .background(
+                    LinearGradient(
+                        colors: [
+                            Color.black.opacity(0.02),
+                            Color.clear
+                        ],
+                        startPoint: .top,
+                        endPoint: UnitPoint(x: 0.5, y: 0.1)
+                    )
+                )
         )
     }
     
     private func teamRow(team: ESPNEvent.Competition.Competitor?, isWinner: Bool) -> some View {
-        HStack(spacing: 12) {
-            // Team logo with fallback
-            Group {
-                if let logoURL = team?.team?.logo, let url = URL(string: logoURL) {
-                    AsyncImage(url: url) { image in
+        HStack(spacing: 8) {
+            // Ranking if available
+            if let rank = team?.curatedRank?.current {
+                Text("\(rank)")
+                    .font(.system(size: 11))
+                    .fontWeight(.medium)
+                    .foregroundColor(.secondary)
+                    .frame(width: 20)
+            } else {
+                Color.clear
+                    .frame(width: 20)
+            }
+            
+            // Team logo
+            if let logoURL = team?.team?.logo, let url = URL(string: logoURL) {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .success(let image):
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                    } placeholder: {
-                        Circle()
-                            .fill(teamColor(team?.team?.color))
-                            .overlay(
-                                Text(team?.team?.abbreviation?.prefix(2) ?? "")
-                                    .font(.caption2)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(.white)
-                            )
+                    case .failure(_):
+                        teamLogoPlaceholder(team: team)
+                    case .empty:
+                        // Show placeholder immediately while loading
+                        teamLogoPlaceholder(team: team)
+                            .opacity(0.6)
+                    @unknown default:
+                        teamLogoPlaceholder(team: team)
                     }
-                } else {
-                    Circle()
-                        .fill(teamColor(team?.team?.color))
-                        .overlay(
-                            Text(team?.team?.abbreviation?.prefix(2) ?? "")
-                                .font(.caption2)
-                                .fontWeight(.bold)
-                                .foregroundColor(.white)
-                        )
                 }
+                .frame(width: 24, height: 24)
+                .animation(.easeInOut(duration: 0.2), value: url)
+            } else {
+                teamLogoPlaceholder(team: team)
+                    .frame(width: 24, height: 24)
             }
-            .frame(width: 32, height: 32)
-            .clipShape(Circle())
             
-            // Team name
-            VStack(alignment: .leading, spacing: 2) {
+            // Team name and record
+            VStack(alignment: .leading, spacing: 1) {
                 Text(team?.team?.shortDisplayName ?? team?.team?.displayName ?? "TBD")
-                    .font(.system(size: 16, weight: isWinner ? .semibold : .regular))
+                    .font(.system(size: 14, weight: isWinner ? .semibold : .regular))
                     .foregroundColor(.primary)
                     .lineLimit(1)
                 
                 if let record = team?.records?.first?.summary {
                     Text(record)
-                        .font(.caption)
+                        .font(.system(size: 11))
                         .foregroundColor(.secondary)
                 }
             }
             
             Spacer()
             
-            // Ranking if available
-            if let rank = team?.curatedRank?.current {
-                Text("\(rank)")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(.secondary)
-                    .frame(width: 20, height: 20)
-                    .background(Circle().fill(Color.gray.opacity(0.2)))
-            }
-            
             // Score
             Text(team?.score ?? "-")
-                .font(.title2)
-                .fontWeight(isWinner ? .bold : .regular)
-                .foregroundColor(isWinner ? .primary : .secondary)
-                .frame(width: 40, alignment: .trailing)
+                .font(.system(size: 18, weight: isWinner ? .bold : .medium))
+                .foregroundColor(isWinner ? .primary : .secondary.opacity(0.8))
+                .frame(minWidth: 35, alignment: .trailing)
+                .shadow(color: isWinner ? .black.opacity(0.1) : .clear, radius: 1, x: 0, y: 1)
         }
     }
     
@@ -576,6 +810,29 @@ struct GameCard: View {
         return Color(hex: colorString) ?? .gray
     }
     
+    private func teamLogoPlaceholder(team: ESPNEvent.Competition.Competitor?) -> some View {
+        RoundedRectangle(cornerRadius: 6)
+            .fill(
+                LinearGradient(
+                    colors: [
+                        teamColor(team?.team?.color),
+                        teamColor(team?.team?.color).opacity(0.8)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .overlay(
+                Text(team?.team?.abbreviation?.prefix(2) ?? "")
+                    .font(.system(size: 8, weight: .bold))
+                    .foregroundColor(.white)
+                    .shadow(color: .black.opacity(0.3), radius: 1, x: 0, y: 1)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+            )
+    }
 }
 
 extension Color {

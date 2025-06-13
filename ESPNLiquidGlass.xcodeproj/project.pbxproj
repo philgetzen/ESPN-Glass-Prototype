@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 63;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -19,13 +19,13 @@
 		77734226503B19848E001A4E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FEE66B13F686D18312E51EC /* ContentView.swift */; };
 		79F93FDF906B067BD88F6E73 /* WatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6578FCB89A50881CBFF650CF /* WatchView.swift */; };
 		8B4EC3292DFA68CF00A0F0FD /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4EC3282DFA68CF00A0F0FD /* SettingsView.swift */; };
-		97A6DD0F499A5EAFEFC3A037 /* MoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59FA27E5C8EB0662F63B4B20 /* MoreView.swift */; };
-		9B9D378DF72B0B039CAA04A0 /* ScoresView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB9650F17DB9016F4EEF37BD /* ScoresView.swift */; };
-		9C39DF3111BA9CD51451DD73 /* LiquidGlassEffects.swift in Sources */ = {isa = PBXBuildFile; fileRef = C08CCE6AAC952D4BAF444B4D /* LiquidGlassEffects.swift */; };
+		8B4EC32C2DFA6B8200A0F0FD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B4EC32B2DFA6B8200A0F0FD /* Assets.xcassets */; };
 		8B4EC32E2DFA6C0000A0F0FD /* ESPNAPIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4EC32F2DFA6C0000A0F0FD /* ESPNAPIModels.swift */; };
 		8B4EC3302DFA6C0100A0F0FD /* ESPNAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4EC3312DFA6C0100A0F0FD /* ESPNAPIService.swift */; };
 		8B4EC3332DFA6D0000A0F0FD /* VideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4EC3342DFA6D0000A0F0FD /* VideoPlayerView.swift */; };
-		8B4EC32C2DFA6B8200A0F0FD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B4EC32B2DFA6B8200A0F0FD /* Assets.xcassets */; };
+		97A6DD0F499A5EAFEFC3A037 /* MoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59FA27E5C8EB0662F63B4B20 /* MoreView.swift */; };
+		9B9D378DF72B0B039CAA04A0 /* ScoresView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB9650F17DB9016F4EEF37BD /* ScoresView.swift */; };
+		9C39DF3111BA9CD51451DD73 /* LiquidGlassEffects.swift in Sources */ = {isa = PBXBuildFile; fileRef = C08CCE6AAC952D4BAF444B4D /* LiquidGlassEffects.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -45,14 +45,18 @@
 		8B4EC3282DFA68CF00A0F0FD /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		8B4EC32A2DFA6B0D00A0F0FD /* ESPN_Logo.svg */ = {isa = PBXFileReference; lastKnownFileType = text; path = ESPN_Logo.svg; sourceTree = "<group>"; };
 		8B4EC32B2DFA6B8200A0F0FD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		9A5A71C2D41226D0ECBB7B96 /* ESPNLiquidGlassApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ESPNLiquidGlassApp.swift; sourceTree = "<group>"; };
-		AB9650F17DB9016F4EEF37BD /* ScoresView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoresView.swift; sourceTree = "<group>"; };
-		C08CCE6AAC952D4BAF444B4D /* LiquidGlassEffects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidGlassEffects.swift; sourceTree = "<group>"; };
 		8B4EC32F2DFA6C0000A0F0FD /* ESPNAPIModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ESPNAPIModels.swift; sourceTree = "<group>"; };
 		8B4EC3312DFA6C0100A0F0FD /* ESPNAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ESPNAPIService.swift; sourceTree = "<group>"; };
 		8B4EC3342DFA6D0000A0F0FD /* VideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerView.swift; sourceTree = "<group>"; };
+		9A5A71C2D41226D0ECBB7B96 /* ESPNLiquidGlassApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ESPNLiquidGlassApp.swift; sourceTree = "<group>"; };
+		AB9650F17DB9016F4EEF37BD /* ScoresView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoresView.swift; sourceTree = "<group>"; };
+		C08CCE6AAC952D4BAF444B4D /* LiquidGlassEffects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidGlassEffects.swift; sourceTree = "<group>"; };
 		D20D399CC915C46B129E7648 /* ESPNLiquidGlass.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ESPNLiquidGlass.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		8B473A242DFCB40400D534FA /* Components */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Components; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXGroup section */
 		04EF83CAD2910A6E1A981C7A = {
@@ -79,14 +83,6 @@
 			path = Utils;
 			sourceTree = "<group>";
 		};
-		8B4EC3322DFA6C0200A0F0FD /* Services */ = {
-			isa = PBXGroup;
-			children = (
-				8B4EC3312DFA6C0100A0F0FD /* ESPNAPIService.swift */,
-			);
-			path = Services;
-			sourceTree = "<group>";
-		};
 		6B96048EF944C723321CB35C /* Models */ = {
 			isa = PBXGroup;
 			children = (
@@ -100,9 +96,18 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		8B4EC3322DFA6C0200A0F0FD /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				8B4EC3312DFA6C0100A0F0FD /* ESPNAPIService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
 		8C8120A40B010B3BBCD463BF /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				8B473A242DFCB40400D534FA /* Components */,
 				8B4EC3282DFA68CF00A0F0FD /* SettingsView.swift */,
 				50509C1FEAE73A8195BBD35A /* ArticleDetailView.swift */,
 				3FEE66B13F686D18312E51EC /* ContentView.swift */,
@@ -154,6 +159,9 @@
 			);
 			dependencies = (
 			);
+			fileSystemSynchronizedGroups = (
+				8B473A242DFCB40400D534FA /* Components */,
+			);
 			name = ESPNLiquidGlass;
 			packageProductDependencies = (
 			);
@@ -193,6 +201,17 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		8B4EC32D2DFA6B8300A0F0FD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8B4EC32C2DFA6B8200A0F0FD /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		8056A507B85DADEC4A4B7F60 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -220,17 +239,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXResourcesBuildPhase section */
-		8B4EC32D2DFA6B8300A0F0FD /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				8B4EC32C2DFA6B8200A0F0FD /* Assets.xcassets in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXResourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
 		1E3666737A5CABA40979411D /* Debug */ = {

@@ -33,7 +33,7 @@ enum Sport: String, CaseIterable, Identifiable {
     var color: Color {
         switch self {
         case .basketball: return .orange
-        case .baseball: return .white
+        case .baseball: return .primary
         case .football: return .brown
         case .hockey: return .blue
         case .soccer: return .green

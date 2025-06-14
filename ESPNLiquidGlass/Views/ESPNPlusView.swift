@@ -166,38 +166,10 @@ struct ESPNPlusView: View {
                     .padding(.bottom, 40)
                 }
             }
-            .background(Color.black)
+            .adaptiveBackground()
             .navigationTitle("ESPN+")
             .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack(spacing: 16) {
-                        Button(action: {}) {
-                            Image(systemName: "magnifyingglass")
-                                .foregroundColor(.primary)
-                                .font(.system(size: 16, weight: .medium))
-                                .glowEffect(
-                                    color: .blue,
-                                    radius: 3,
-                                    intensity: .subtle,
-                                    pulsation: .none
-                                )
-                        }
-                        
-                        Button(action: { showSettings = true }) {
-                            Image(systemName: "gear")
-                                .foregroundColor(.primary)
-                                .font(.system(size: 16, weight: .medium))
-                                .glowEffect(
-                                    color: .gray,
-                                    radius: 3,
-                                    intensity: .subtle,
-                                    pulsation: .none
-                                )
-                        }
-                    }
-                }
-            }
+            .espnToolbar(onSettingsTap: { showSettings = true })
             .sheet(isPresented: $showSettings) {
                 SettingsView(colorScheme: $colorScheme)
                     .preferredColorScheme(colorScheme)

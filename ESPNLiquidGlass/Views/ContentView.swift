@@ -29,6 +29,40 @@ struct ContentView: View {
                 .tag(4)
         }
         .preferredColorScheme(colorScheme)
+        .onAppear {
+            configureTabBarAppearance()
+        }
+        .onChange(of: colorScheme) { _, newScheme in
+            configureTabBarAppearance()
+        }
+    }
+    
+    private func configureTabBarAppearance() {
+        let appearance = UITabBarAppearance()
+        appearance.configureWithDefaultBackground()
+        
+        // Set background based on current color scheme
+        if colorScheme == .dark {
+            appearance.backgroundColor = UIColor.systemBackground.withAlphaComponent(0.8)
+        } else {
+            appearance.backgroundColor = UIColor.systemBackground.withAlphaComponent(0.8)
+        }
+        
+        // Configure blur effect
+        appearance.backgroundEffect = UIBlurEffect(style: colorScheme == .dark ? .systemMaterialDark : .systemMaterialLight)
+        
+        // Configure selected item color (ESPN red)
+        let espnRed = UIColor(red: 0.89, green: 0.094, blue: 0.216, alpha: 1.0) // #E31837
+        appearance.stackedLayoutAppearance.selected.iconColor = espnRed
+        appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: espnRed]
+        appearance.inlineLayoutAppearance.selected.iconColor = espnRed
+        appearance.inlineLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: espnRed]
+        appearance.compactInlineLayoutAppearance.selected.iconColor = espnRed
+        appearance.compactInlineLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: espnRed]
+        
+        // Set the appearance
+        UITabBar.appearance().standardAppearance = appearance
+        UITabBar.appearance().scrollEdgeAppearance = appearance
     }
 }
 

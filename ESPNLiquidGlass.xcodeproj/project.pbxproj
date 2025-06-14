@@ -18,6 +18,8 @@
 		627A2E1096375815715DC193 /* ESPNPlusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 284D808A25D67C72DFD01367 /* ESPNPlusView.swift */; };
 		77734226503B19848E001A4E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FEE66B13F686D18312E51EC /* ContentView.swift */; };
 		79F93FDF906B067BD88F6E73 /* WatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6578FCB89A50881CBFF650CF /* WatchView.swift */; };
+		8B473A342DFCC4A400D534FA /* ESPN_E_Logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 8B473A332DFCC4A400D534FA /* ESPN_E_Logo.png */; };
+		8B473A362DFDBE2100D534FA /* BackgroundModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B473A352DFDBE2100D534FA /* BackgroundModifier.swift */; };
 		8B4EC3292DFA68CF00A0F0FD /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4EC3282DFA68CF00A0F0FD /* SettingsView.swift */; };
 		8B4EC32C2DFA6B8200A0F0FD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B4EC32B2DFA6B8200A0F0FD /* Assets.xcassets */; };
 		8B4EC32E2DFA6C0000A0F0FD /* ESPNAPIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4EC32F2DFA6C0000A0F0FD /* ESPNAPIModels.swift */; };
@@ -42,6 +44,8 @@
 		62C0BA29358983FDB7E51123 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		641A7F75C745482FF48C2723 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		6578FCB89A50881CBFF650CF /* WatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchView.swift; sourceTree = "<group>"; };
+		8B473A332DFCC4A400D534FA /* ESPN_E_Logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ESPN_E_Logo.png; sourceTree = "<group>"; };
+		8B473A352DFDBE2100D534FA /* BackgroundModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundModifier.swift; sourceTree = "<group>"; };
 		8B4EC3282DFA68CF00A0F0FD /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		8B4EC32A2DFA6B0D00A0F0FD /* ESPN_Logo.svg */ = {isa = PBXFileReference; lastKnownFileType = text; path = ESPN_Logo.svg; sourceTree = "<group>"; };
 		8B4EC32B2DFA6B8200A0F0FD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -51,11 +55,12 @@
 		9A5A71C2D41226D0ECBB7B96 /* ESPNLiquidGlassApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ESPNLiquidGlassApp.swift; sourceTree = "<group>"; };
 		AB9650F17DB9016F4EEF37BD /* ScoresView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoresView.swift; sourceTree = "<group>"; };
 		C08CCE6AAC952D4BAF444B4D /* LiquidGlassEffects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidGlassEffects.swift; sourceTree = "<group>"; };
-		D20D399CC915C46B129E7648 /* ESPNLiquidGlass.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ESPNLiquidGlass.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D20D399CC915C46B129E7648 /* ESPN.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ESPN.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		8B473A242DFCB40400D534FA /* Components */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Components; sourceTree = "<group>"; };
+		8B473A302DFCC0F000D534FA /* ViewStates */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = ViewStates; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXGroup section */
@@ -70,7 +75,7 @@
 		2A6B2E339548A718DFF7789E /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D20D399CC915C46B129E7648 /* ESPNLiquidGlass.app */,
+				D20D399CC915C46B129E7648 /* ESPN.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -78,6 +83,7 @@
 		3C922A91825F840B3E279FB7 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				8B473A352DFDBE2100D534FA /* BackgroundModifier.swift */,
 				C08CCE6AAC952D4BAF444B4D /* LiquidGlassEffects.swift */,
 			);
 			path = Utils;
@@ -124,15 +130,17 @@
 		B3AA3FAD822A8041662D358A /* ESPNLiquidGlass */ = {
 			isa = PBXGroup;
 			children = (
+				8B4EC32B2DFA6B8200A0F0FD /* Assets.xcassets */,
 				8B4EC32A2DFA6B0D00A0F0FD /* ESPN_Logo.svg */,
 				62C0BA29358983FDB7E51123 /* .gitignore */,
 				641A7F75C745482FF48C2723 /* Info.plist */,
+				8B473A302DFCC0F000D534FA /* ViewStates */,
 				FBCF17A5201B830FC53777AD /* App */,
 				6B96048EF944C723321CB35C /* Models */,
 				8B4EC3322DFA6C0200A0F0FD /* Services */,
 				3C922A91825F840B3E279FB7 /* Utils */,
 				8C8120A40B010B3BBCD463BF /* Views */,
-				8B4EC32B2DFA6B8200A0F0FD /* Assets.xcassets */,
+				8B473A332DFCC4A400D534FA /* ESPN_E_Logo.png */,
 			);
 			path = ESPNLiquidGlass;
 			sourceTree = "<group>";
@@ -161,12 +169,13 @@
 			);
 			fileSystemSynchronizedGroups = (
 				8B473A242DFCB40400D534FA /* Components */,
+				8B473A302DFCC0F000D534FA /* ViewStates */,
 			);
 			name = ESPNLiquidGlass;
 			packageProductDependencies = (
 			);
 			productName = ESPNLiquidGlass;
-			productReference = D20D399CC915C46B129E7648 /* ESPNLiquidGlass.app */;
+			productReference = D20D399CC915C46B129E7648 /* ESPN.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -206,6 +215,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B473A342DFCC4A400D534FA /* ESPN_E_Logo.png in Resources */,
 				8B4EC32C2DFA6B8200A0F0FD /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -235,6 +245,7 @@
 				8B4EC32E2DFA6C0000A0F0FD /* ESPNAPIModels.swift in Sources */,
 				8B4EC3302DFA6C0100A0F0FD /* ESPNAPIService.swift in Sources */,
 				8B4EC3332DFA6D0000A0F0FD /* VideoPlayerView.swift in Sources */,
+				8B473A362DFDBE2100D534FA /* BackgroundModifier.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -311,7 +322,7 @@
 				MARKETING_VERSION = 1.0.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = ESPN;
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -397,7 +408,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = ESPN;
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;

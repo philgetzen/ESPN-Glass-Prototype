@@ -217,29 +217,12 @@ struct GameCard: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
-        .background(
-            Rectangle()
-                .fill(Color(UIColor.systemBackground))
-                .glowEffect(
-                    color: event.isLive ? .red : .clear,
-                    radius: 2,
-                    intensity: event.isLive ? .medium : .subtle,
-                    pulsation: event.isLive ? .gentle : .none
-                )
-        )
-        .overlay(
-            Rectangle()
-                .fill(Color.clear)
-                .background(
-                    LinearGradient(
-                        colors: [
-                            Color.black.opacity(0.02),
-                            Color.clear
-                        ],
-                        startPoint: .top,
-                        endPoint: UnitPoint(x: 0.5, y: 0.1)
-                    )
-                )
+        .background(Color.clear)
+        .glowEffect(
+            color: event.isLive ? .red : .clear,
+            radius: 2,
+            intensity: event.isLive ? .medium : .subtle,
+            pulsation: event.isLive ? .gentle : .none
         )
     }
     

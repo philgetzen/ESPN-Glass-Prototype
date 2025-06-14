@@ -106,3 +106,53 @@ open ESPNLiquidGlass.xcodeproj
 - `LiquidGlassEffects.swift`: Custom glass-like visual effects
 
 This session focused heavily on data parsing, image handling, and UI polish. The core functionality is solid with real ESPN integration working well.
+
+## Component Creation Guidelines
+
+When creating new UI components, follow these patterns:
+
+### 1. Location
+- Place reusable components in `Views/Components/`
+- Keep screen-specific components within their parent view file
+
+### 2. Structure
+```swift
+import SwiftUI
+
+struct ComponentName: View {
+    // MARK: - Properties
+    let requiredProperty: Type
+    let onAction: () -> Void  // For callbacks
+    
+    // MARK: - Body
+    var body: some View {
+        // Implementation
+    }
+    
+    // MARK: - Private Views
+    private var subView: some View {
+        // Break down complex views
+    }
+    
+    // MARK: - Private Methods
+    private func helperMethod() {
+        // Any helper logic
+    }
+}
+
+// MARK: - Previews
+#Preview("Description") {
+    ComponentName(
+        requiredProperty: mockValue,
+        onAction: {}
+    )
+    .background(Color(UIColor.systemBackground))
+}
+```
+
+### 3. Best Practices
+- Use semantic property names (e.g., `onArticleTap` not `onTap`)
+- Include multiple preview variants showing different states
+- Extract complex subviews into private computed properties
+- Keep components focused on presentation, not business logic
+- Pass callbacks for user interactions rather than handling state internally

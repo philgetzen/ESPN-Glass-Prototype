@@ -47,7 +47,7 @@ struct MoreView: View {
                                         
                                         Text(sport.rawValue)
                                             .font(.caption)
-                                            .foregroundColor(.white)
+                                            .foregroundColor(.primary)
                                             .lineLimit(1)
                                     }
                                 }
@@ -78,7 +78,7 @@ struct MoreView: View {
                                         
                                         Text(sport.rawValue)
                                             .font(.body)
-                                            .foregroundColor(.white)
+                                            .foregroundColor(.primary)
                                         
                                         Spacer()
                                         
@@ -118,7 +118,7 @@ struct MoreView: View {
                                 
                                 Text("Sports Betting")
                                     .font(.body)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.primary)
                                 
                                 Spacer()
                                 
@@ -138,7 +138,7 @@ struct MoreView: View {
                                 
                                 Text("About ESPN BET Sportsbook")
                                     .font(.body)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.primary)
                                 
                                 Spacer()
                                 
@@ -164,7 +164,7 @@ struct MoreView: View {
                                 
                                 Text("Settings")
                                     .font(.body)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.primary)
                                 
                                 Spacer()
                                 
@@ -179,44 +179,9 @@ struct MoreView: View {
                     .padding(.bottom, 40)
                 }
             }
-            .background(Color.black)
+            .adaptiveBackground()
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Image("ESPN_Logo")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(height: 24)
-                }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack(spacing: 16) {
-                        Button(action: {}) {
-                            Image(systemName: "magnifyingglass")
-                                .foregroundColor(.primary)
-                                .font(.system(size: 16, weight: .medium))
-                                .glowEffect(
-                                    color: .blue,
-                                    radius: 3,
-                                    intensity: .subtle,
-                                    pulsation: .none
-                                )
-                        }
-                        
-                        Button(action: { showSettings = true }) {
-                            Image(systemName: "gear")
-                                .foregroundColor(.primary)
-                                .font(.system(size: 16, weight: .medium))
-                                .glowEffect(
-                                    color: .gray,
-                                    radius: 3,
-                                    intensity: .subtle,
-                                    pulsation: .none
-                                )
-                        }
-                    }
-                }
-            }
+            .espnToolbar(onSettingsTap: { showSettings = true })
             .sheet(isPresented: $showSettings) {
                 SettingsView(colorScheme: $colorScheme)
                     .preferredColorScheme(colorScheme)

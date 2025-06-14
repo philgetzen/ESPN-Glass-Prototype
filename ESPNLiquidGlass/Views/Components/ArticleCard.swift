@@ -64,6 +64,8 @@ struct ArticleCard: View {
             cardContent
         }
         .liquidGlassCard(cornerRadius: 16, density: .medium)
+        .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
+        .shadow(color: Color.black.opacity(0.1), radius: 16, x: 0, y: 8)
         .padding(.horizontal)
         .onTapGesture {
             onArticleTap()
@@ -164,6 +166,8 @@ struct ArticleCard: View {
         }
         .padding(12)
         .liquidGlassCard(cornerRadius: 12, density: .light)
+        .shadow(color: Color.black.opacity(0.12), radius: 6, x: 0, y: 3)
+        .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 6)
         .padding(.horizontal)
         .onTapGesture {
             onArticleTap()

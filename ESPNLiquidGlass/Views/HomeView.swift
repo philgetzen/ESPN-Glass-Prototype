@@ -1,116 +1,75 @@
 import SwiftUI
 
 struct HomeView: View {
-    @State private var articles: [Article] = []
+    @State private var viewState = HomeViewState.loading
     @State private var selectedArticle: Article?
     @State private var selectedVideoArticle: Article?
     @State private var showSettings = false
-    @State private var isLoading = true
-    @State private var errorMessage: String?
     @Binding var colorScheme: ColorScheme?
     
     private let apiService = ESPNAPIService.shared
     
     var body: some View {
         NavigationStack {
-            ZStack {
-                if isLoading {
-                    ProgressView("Loading articles...")
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color(UIColor.systemBackground))
-                } else if let error = errorMessage {
-                    VStack(spacing: 16) {
-                        Image(systemName: "exclamationmark.triangle")
-                            .font(.system(size: 50))
-                            .foregroundColor(.red)
-                        Text("Error loading articles")
-                            .font(.headline)
-                        Text(error)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                        Button("Try Again") {
-                            Task {
-                                await loadArticles()
+            VStack {
+                switch viewState {
+                case .loading:
+                    LoadingView("Loading articles...")
+                    
+                case .loaded(let articles):
+                    ScrollView {
+                        LazyVStack(spacing: 20) {
+                            ForEach(articles) { article in
+                                ArticleCard(
+                                    article: article,
+                                    onArticleTap: {
+                                        selectedArticle = article
+                                    },
+                                    onVideoTap: {
+                                        if article.type == .video {
+                                            selectedVideoArticle = article
+                                        }
+                                    }
+                                )
                             }
                         }
-                        .buttonStyle(.borderedProminent)
+                        .padding(.vertical)
                     }
-                    .padding()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color(UIColor.systemBackground))
-                } else {
-                    ScrollView {
-                LazyVStack(spacing: 20) {
-                    ForEach(articles) { article in
-                        ArticleCard(
-                            article: article,
-                            onArticleTap: {
-                                selectedArticle = article
-                            },
-                            onVideoTap: {
-                                if article.type == .video {
-                                    selectedVideoArticle = article
-                                }
-                            }
-                        )
-                    }
+                    .safeAreaInset(edge: .bottom) { Spacer().frame(height: 60) }
+                    
+                case .error(let errorMessage):
+                    ErrorView(error: errorMessage, retry: loadArticles)
+                    
+                case .empty:
+                    EmptyStateView(
+                        icon: "newspaper",
+                        title: "No Articles",
+                        message: "Check back later for new content"
+                    )
                 }
-                .padding(.vertical)
             }
-            .background(Color(UIColor.systemBackground))
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .safeAreaInset(edge: .bottom) { Spacer().frame(height: 60) }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Image("ESPN_Logo")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(height: 24)
-                }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {}) {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(.primary)
-                            .font(.system(size: 16, weight: .medium))
-                            .glowEffect(
-                                color: .blue,
-                                radius: 3,
-                                intensity: .subtle,
-                                pulsation: .none
-                            )
-                    }
-                }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showSettings = true }) {
-                        Image(systemName: "gear")
-                            .foregroundColor(.primary)
-                            .font(.system(size: 16, weight: .medium))
-                            .glowEffect(
-                                color: .gray,
-                                radius: 3,
-                                intensity: .subtle,
-                                pulsation: .none
-                            )
-                    }
-                }
-            }
+            .navigationBarBackButtonHidden(false)
+            .espnToolbar(
+                logoType: .standardLogo,
+                onSettingsTap: { showSettings = true }
+            )
+            .adaptiveBackground()
             .sheet(item: $selectedArticle) { article in
                 ArticleDetailView(article: article)
+                    .preferredColorScheme(colorScheme)
             }
             .sheet(item: $selectedVideoArticle) { article in
                 if let videoURL = article.videoURL, let url = URL(string: videoURL) {
                     VideoPlayerView(videoURL: url, article: article)
+                        .preferredColorScheme(colorScheme)
                 }
             }
             .sheet(isPresented: $showSettings) {
                 SettingsView(colorScheme: $colorScheme)
                     .preferredColorScheme(colorScheme)
-            }
-                }
             }
             .task {
                 await loadArticles()
@@ -122,8 +81,9 @@ struct HomeView: View {
     }
     
     private func loadArticles() async {
-        isLoading = true
-        errorMessage = nil
+        await MainActor.run {
+            viewState = .loading
+        }
         
         do {
             // Fetch general news feed
@@ -134,17 +94,20 @@ struct HomeView: View {
             
             // Update on main thread
             await MainActor.run {
-                self.articles = convertedArticles
-                self.isLoading = false
+                if convertedArticles.isEmpty {
+                    viewState = .empty
+                } else {
+                    viewState = .loaded(convertedArticles)
+                }
             }
         } catch {
             await MainActor.run {
-                self.errorMessage = error.localizedDescription
-                self.isLoading = false
-                // Fall back to mock data if API fails
-                self.articles = Article.mockArticles
+                viewState = .error(error.localizedDescription)
             }
         }
     }
 }
 
+#Preview {
+    HomeView(colorScheme: .constant(.dark))
+}

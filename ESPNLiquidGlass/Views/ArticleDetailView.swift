@@ -68,7 +68,7 @@ struct ArticleDetailView: View {
                         Text(article.title)
                             .font(.largeTitle)
                             .fontWeight(.bold)
-                            .foregroundColor(.white)
+                            .foregroundColor(.primary)
                         
                         // Subtitle
                         if let subtitle = article.subtitle {
@@ -117,7 +117,7 @@ struct ArticleDetailView: View {
                                 .padding(.vertical, 2)
                                 .background(Color.gray.opacity(0.3))
                                 .cornerRadius(4)
-                                .foregroundColor(.white)
+                                .foregroundColor(.primary)
                         }
                         
                         // Author and Date
@@ -130,7 +130,7 @@ struct ArticleDetailView: View {
                                 Text(article.author)
                                     .font(.subheadline)
                                     .fontWeight(.semibold)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.primary)
                                 
                                 Text(article.formattedDate)
                                     .font(.caption)
@@ -200,7 +200,7 @@ struct ArticleDetailView: View {
                             if !article.content.isEmpty {
                                 Text(article.content)
                                     .font(.body)
-                                    .foregroundColor(.white.opacity(0.9))
+                                    .foregroundColor(.primary.opacity(0.9))
                                     .lineSpacing(8)
                             }
                             
@@ -213,7 +213,7 @@ struct ArticleDetailView: View {
                                     Text("Full Article")
                                         .font(.headline)
                                         .fontWeight(.bold)
-                                        .foregroundColor(.white)
+                                        .foregroundColor(.primary)
                                 }
                                 
                                 Text("This is a preview. Read the complete article with in-depth analysis, quotes, and additional reporting on ESPN.com.")
@@ -269,7 +269,7 @@ struct ArticleDetailView: View {
                                             
                                             Text(team.fullName)
                                                 .font(.subheadline)
-                                                .foregroundColor(.white)
+                                                .foregroundColor(.primary)
                                         }
                                         .padding(.horizontal, 12)
                                         .padding(.vertical, 8)
@@ -285,13 +285,13 @@ struct ArticleDetailView: View {
                     .padding(.bottom, 40)
                 }
             }
-            .background(Color.black)
+            .adaptiveBackground()
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "xmark")
-                            .foregroundColor(.white)
+                            .foregroundColor(.primary)
                     }
                 }
                 
@@ -299,12 +299,12 @@ struct ArticleDetailView: View {
                     HStack(spacing: 16) {
                         Button(action: {}) {
                             Image(systemName: "textformat")
-                                .foregroundColor(.white)
+                                .foregroundColor(.primary)
                         }
                         
                         Button(action: {}) {
                             Image(systemName: "square.and.arrow.up")
-                                .foregroundColor(.white)
+                                .foregroundColor(.primary)
                         }
                     }
                 }

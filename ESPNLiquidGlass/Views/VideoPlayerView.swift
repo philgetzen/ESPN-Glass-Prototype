@@ -64,6 +64,7 @@ struct VideoPlayerView: View {
             }
             .toolbarBackground(.clear, for: .navigationBar)
         }
+        .preferredColorScheme(.dark)
         .onAppear {
             setupPlayer()
         }

@@ -1,19 +1,29 @@
 import SwiftUI
 
 struct ScoresView: View {
-    @State private var sportsData: [SportGameData] = []
+    @State private var viewState = ScoresViewState.loading
     @State private var selectedDate = Date()
     @State private var selectedSports: Set<String> = ["Top Events"]
-    @State private var isLoading = false
     @State private var showSettings = false
     @State private var currentWeekOffset = 0
     @Binding var colorScheme: ColorScheme?
+    @Environment(\.colorScheme) private var environmentColorScheme
     
     private let apiService = ESPNAPIService.shared
+    
+    // Adaptive overlay color for light/dark mode
+    private var overlayColor: Color {
+        let currentScheme = colorScheme ?? environmentColorScheme
+        return currentScheme == .dark ? Color.black.opacity(0.3) : Color.white.opacity(0.7)
+    }
     
     // Available sports filters - dynamically ordered based on game availability
     private var availableSports: [String] {
         let baseSports = ["NBA", "WNBA", "PGA", "MLB", "NHL", "NCAAF", "NCAAM", "MLS"]
+        
+        guard case .loaded(let sportsData) = viewState else {
+            return ["Top Events"] + baseSports
+        }
         
         // Separate sports with games from those without
         let sportsWithGames = baseSports.filter { sport in
@@ -29,6 +39,10 @@ struct ScoresView: View {
     
     
     var filteredSportsData: [SportGameData] {
+        guard case .loaded(let sportsData) = viewState else {
+            return []
+        }
+        
         if selectedSports.contains("Top Events") {
             // Show all sports with games
             return sportsData
@@ -43,75 +57,60 @@ struct ScoresView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Date slider
-                dateSlider
-                
-                // Sport filter toggles
-                sportToggles
+                // Date slider and sport toggles with frosted glass effect
+                VStack(spacing: 0) {
+                    // Date slider
+                    dateSlider
+                    
+                    // Sport filter toggles
+                    sportToggles
+                }
+                .background(overlayColor)
                 
                 // Games list
-                if isLoading {
-                    Spacer()
-                    ProgressView()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if filteredSportsData.isEmpty {
-                    Spacer()
-                    VStack(spacing: 12) {
-                        Image(systemName: "sportscourt")
-                            .font(.system(size: 50))
-                            .foregroundColor(.secondary)
-                        Text("No games scheduled")
-                            .font(.headline)
-                            .foregroundColor(.secondary)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    List {
-                        ForEach(filteredSportsData, id: \.league) { sportData in
-                            GamesList(sportData: sportData)
-                                .listRowInsets(EdgeInsets(top: 12, leading: 0, bottom: 12, trailing: 0))
-                                .listRowSeparator(.hidden)
-                                .listRowBackground(Color.clear)
-                        }
-                    }
-                    .listStyle(.plain)
-                    .background(
-                        Color(UIColor.systemGroupedBackground)
-                            .glowEffect(
-                                color: .gray,
-                                radius: 5,
-                                intensity: .subtle,
-                                pulsation: .none
+                Group {
+                    switch viewState {
+                    case .loading:
+                        LoadingView()
+                        
+                    case .loaded(_):
+                        if filteredSportsData.isEmpty {
+                            EmptyStateView(
+                                icon: "sportscourt",
+                                title: "No games scheduled",
+                                message: selectedSports.contains("Top Events") 
+                                    ? "No games scheduled for this date"
+                                    : "No games for selected sports"
                             )
-                    )
-                    .scrollContentBackground(.hidden)
-                }
-            }
-            .background(Color(UIColor.systemGroupedBackground))
-            .navigationTitle("Scores")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack(spacing: 16) {
-                        Button(action: {}) {
-                            Image(systemName: "magnifyingglass")
-                                .foregroundColor(.primary)
+                        } else {
+                            List {
+                                ForEach(filteredSportsData, id: \.league) { sportData in
+                                    GamesList(sportData: sportData)
+                                        .listRowInsets(EdgeInsets(top: 12, leading: 0, bottom: 12, trailing: 0))
+                                        .listRowSeparator(.hidden)
+                                        .listRowBackground(Color.clear)
+                                }
+                            }
+                            .listStyle(.plain)
+                            .scrollContentBackground(.hidden)
                         }
                         
-                        Button(action: { showSettings = true }) {
-                            Image(systemName: "gear")
-                                .foregroundColor(.primary)
-                                .font(.system(size: 16, weight: .medium))
-                                .glowEffect(
-                                    color: .gray,
-                                    radius: 3,
-                                    intensity: .subtle,
-                                    pulsation: .none
-                                )
-                        }
+                    case .error(let errorMessage):
+                        ErrorView(error: errorMessage, retry: loadScores)
+                        
+                    case .empty:
+                        EmptyStateView(
+                            icon: "sportscourt",
+                            title: "No Games Today",
+                            message: "Check back later or try a different date"
+                        )
                     }
                 }
             }
+            .adaptiveBackground()
+            .navigationTitle("Scores")
+            .navigationBarTitleDisplayMode(.inline)
+            .espnToolbar(onSettingsTap: { showSettings = true })
             .task {
                 await loadScores()
             }
@@ -170,41 +169,8 @@ struct ScoresView: View {
             }
         }
         .padding(.vertical, 8)
-        .background(Color(UIColor.systemBackground))
-        .overlay(alignment: .leading) {
-            // Left edge glass mask
-            Rectangle()
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color(UIColor.systemBackground),
-                            Color(UIColor.systemBackground).opacity(0.8),
-                            Color.clear
-                        ],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-                .frame(width: 44)
-                .allowsHitTesting(false) // Allow taps to pass through
-        }
-        .overlay(alignment: .trailing) {
-            // Right edge glass mask
-            Rectangle()
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color.clear,
-                            Color(UIColor.systemBackground).opacity(0.8),
-                            Color(UIColor.systemBackground)
-                        ],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-                .frame(width: 44)
-                .allowsHitTesting(false) // Allow taps to pass through
-        }
+        
+        
         .onAppear {
             // Initialize with today's date centered
             initializeSelectedDate()
@@ -248,7 +214,12 @@ struct ScoresView: View {
                     SportToggle(
                         sport: sport,
                         isSelected: selectedSports.contains(sport),
-                        hasGames: sportsData.contains { $0.leagueAbbreviation == sport }
+                        hasGames: {
+                            if case .loaded(let data) = viewState {
+                                return data.contains { $0.leagueAbbreviation == sport }
+                            }
+                            return false
+                        }()
                     ) {
                         toggleSport(sport)
                     }
@@ -262,7 +233,6 @@ struct ScoresView: View {
         .clipped()
         .scrollDisabled(false)
         .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
-        .background(Color(UIColor.systemBackground))
     }
     
     private func toggleSport(_ sport: String) {
@@ -282,15 +252,20 @@ struct ScoresView: View {
     }
     
     private func loadScores() async {
-        isLoading = true
+        await MainActor.run {
+            viewState = .loading
+        }
         
         let sports = selectedSports.contains("Top Events") ? ["NBA", "WNBA", "PGA", "MLB", "NHL", "NCAAF", "NCAAM", "MLS"] : Array(selectedSports)
         let data = await apiService.fetchScoresForDate(selectedDate, sports: sports)
         
         await MainActor.run {
             withAnimation(.easeInOut(duration: 0.3)) {
-                self.sportsData = data
-                self.isLoading = false
+                if data.isEmpty {
+                    viewState = .empty
+                } else {
+                    viewState = .loaded(data)
+                }
             }
         }
     }
@@ -474,25 +449,13 @@ struct GamesList: View {
                         }
                     }
                 }
-                .background(Color(UIColor.systemBackground))
             }
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(UIColor.systemBackground))
-                    .glowEffect(
-                        color: .gray,
-                        radius: 3,
-                        intensity: .medium,
-                        pulsation: .none
-                    )
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .background(Color.clear)
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
                     .stroke(Color.primary.opacity(0.15), lineWidth: 1)
             )
-            .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
-            .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+            .liquidGlassCard(cornerRadius: 16, density: .medium)
             .padding(.horizontal, 16)
         }
     }

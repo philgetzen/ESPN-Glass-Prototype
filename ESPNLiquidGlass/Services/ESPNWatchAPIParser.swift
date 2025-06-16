@@ -198,7 +198,16 @@ final class ESPNWatchAPIParser {
         
         // Images
         let imageHref = data["imageHref"] as? String
-        let backgroundImageHref = data["backgroundImageHref"] as? String
+        
+        // Handle nested backgroundImage object
+        var backgroundImageHref: String?
+        if let backgroundImageData = data["backgroundImage"] as? [String: Any],
+           let href = backgroundImageData["href"] as? String {
+            backgroundImageHref = href
+        } else {
+            backgroundImageHref = data["backgroundImageHref"] as? String
+        }
+        
         let iconHref = data["iconHref"] as? String
         let imageIcon = data["imageIcon"] as? String  // Alternative image field
         let imageFormat = data["imageFormat"] as? String
@@ -252,6 +261,13 @@ final class ESPNWatchAPIParser {
         // Essential logging for inline-header buckets only
         if bucketTags?.contains("inline-header") == true {
             print("🏷️ INLINE-HEADER BUCKET: '\(title ?? name ?? "unknown")' - Type: \(data["type"] ?? "nil")")
+            print("🏷️   Available keys: \(Array(data.keys).sorted())")
+            print("🏷️   Image-related fields:")
+            for key in data.keys.sorted() {
+                if key.lowercased().contains("image") || key.lowercased().contains("icon") || key.lowercased().contains("href") {
+                    print("🏷️     \(key): \(data[key] ?? "nil")")
+                }
+            }
         }
         
         // Create content object with all properties
@@ -358,7 +374,11 @@ final class ESPNWatchAPIParser {
         if content.type?.lowercased() == "inlineheader" {
             print("🖼️ INLINE-HEADER: \(content.title ?? content.name ?? "unknown")")
             print("🖼️   Type: \(content.type ?? "nil")")
+            print("🖼️   imageHref: \(content.imageHref ?? "nil")")
             print("🖼️   backgroundImageHref: \(content.backgroundImageHref ?? "nil")")
+            print("🖼️   iconHref: \(content.iconHref ?? "nil")")
+            print("🖼️   imageIcon: \(content.imageIcon ?? "nil")")
+            print("🖼️   imageFormat: \(content.imageFormat ?? "nil")")
             print("🖼️   Final thumbnailURL: \(thumbnailURL ?? "nil")")
         }
         

@@ -63,6 +63,7 @@ struct ESPNWatchContent {
     let imageHref: String?
     let backgroundImageHref: String?
     let iconHref: String?
+    let imageIcon: String?
     let imageFormat: String?
     let ratio: String?
     
@@ -164,7 +165,7 @@ final class ESPNWatchAPIParser {
                         print("📦 Found \(contentsArray.count) items in bucket '\(bucketName)'")
                         
                         for contentData in contentsArray {
-                            if let content = parseContent(from: contentData) {
+                            if let content = parseContent(from: contentData, bucketTags: bucketTags) {
                                 contents.append(content)
                             }
                         }
@@ -185,7 +186,7 @@ final class ESPNWatchAPIParser {
     }
     
     /// Parses individual content item
-    private static func parseContent(from data: [String: Any]) -> ESPNWatchContent? {
+    private static func parseContent(from data: [String: Any], bucketTags: [String]? = nil) -> ESPNWatchContent? {
         // Extract all the fields we care about
         let id = data["id"] as? String
         let type = data["type"] as? String
@@ -199,6 +200,7 @@ final class ESPNWatchAPIParser {
         let imageHref = data["imageHref"] as? String
         let backgroundImageHref = data["backgroundImageHref"] as? String
         let iconHref = data["iconHref"] as? String
+        let imageIcon = data["imageIcon"] as? String  // Alternative image field
         let imageFormat = data["imageFormat"] as? String
         let ratio = data["ratio"] as? String
         
@@ -241,8 +243,25 @@ final class ESPNWatchAPIParser {
         let keywords = data["keywords"] as? [String]
         let pillMetadata = data["pillMetadata"] as? [String: Any]
         let tracking = data["tracking"] as? [String: Any]
-        let tags = data["tags"] as? [String]
+        let contentTags = data["tags"] as? [String] ?? []
         let autoplay = data["autoplay"] as? Bool
+        
+        // Merge bucket tags with content tags
+        let allTags = contentTags + (bucketTags ?? [])
+        
+        // Debug logging for tag merging
+        if bucketTags?.contains("inline-header") == true {
+            print("🏷️ BUCKET TAG MERGE: '\(title ?? name ?? "unknown")'")
+            print("🏷️ Content tags: \(contentTags)")
+            print("🏷️ Bucket tags: \(bucketTags ?? [])")
+            print("🏷️ Merged tags: \(allTags)")
+            print("🏷️ RAW IMAGE DATA:")
+            print("🏷️   imageHref: \(data["imageHref"] ?? "nil")")
+            print("🏷️   backgroundImageHref: \(data["backgroundImageHref"] ?? "nil")")
+            print("🏷️   iconHref: \(data["iconHref"] ?? "nil")")
+            print("🏷️   imageIcon: \(data["imageIcon"] ?? "nil")")
+            print("🏷️   ALL KEYS: \(Array(data.keys).sorted())")
+        }
         
         // Create content object with all properties
         return ESPNWatchContent(
@@ -256,6 +275,7 @@ final class ESPNWatchAPIParser {
             imageHref: imageHref,
             backgroundImageHref: backgroundImageHref,
             iconHref: iconHref,
+            imageIcon: imageIcon,
             imageFormat: imageFormat,
             ratio: ratio,
             duration: duration,
@@ -291,7 +311,7 @@ final class ESPNWatchAPIParser {
             keywords: keywords,
             pillMetadata: pillMetadata,
             tracking: tracking,
-            tags: tags,
+            tags: allTags,
             autoplay: autoplay
         )
     }
@@ -305,12 +325,23 @@ final class ESPNWatchAPIParser {
             return nil
         }
         
-        // Determine best image URL - try multiple fields for inline-header content
-        var thumbnailURL = content.imageHref ?? content.backgroundImageHref ?? content.iconHref
+        // Determine best image URL - prioritize background image for inline-header content
+        var thumbnailURL: String?
         
-        // For inline-header content, try to request appropriate image sizes
-        if let imageURL = thumbnailURL, content.tags?.contains("inline-header") == true {
-            // For hero content, try to get a larger 16:9 image
+        // Check if this is inline-header content by type
+        if content.type?.lowercased() == "inlineheader" {
+            // For inline-header content, prioritize background image
+            thumbnailURL = content.backgroundImageHref ?? content.imageHref ?? content.iconHref ?? content.imageIcon
+            print("🖼️ Inline-header content detected (type: \(content.type ?? "nil"))")
+            print("🖼️ Using background image priority for inline-header")
+        } else {
+            // For regular content, use standard priority
+            thumbnailURL = content.imageHref ?? content.backgroundImageHref ?? content.iconHref
+        }
+        
+        // For inline-header content, try to request appropriate 58:13 aspect ratio images
+        if let imageURL = thumbnailURL, content.type?.lowercased() == "inlineheader" {
+            // For inline-header content, request 58:13 aspect ratio (approximately 4.46:1)
             if imageURL.contains("espncdn.com") {
                 var urlComponents = URLComponents(string: imageURL)
                 var queryItems = urlComponents?.queryItems ?? []
@@ -320,28 +351,33 @@ final class ESPNWatchAPIParser {
                     ["w", "width", "h", "height", "f", "crop"].contains(item.name.lowercased())
                 }
                 
-                // Add hero sizing - wider format
-                queryItems.append(URLQueryItem(name: "w", value: "800"))
-                queryItems.append(URLQueryItem(name: "h", value: "450"))
+                // Add 58:13 aspect ratio sizing (e.g., 580x130 for good quality)
+                queryItems.append(URLQueryItem(name: "w", value: "580"))
+                queryItems.append(URLQueryItem(name: "h", value: "130"))
                 queryItems.append(URLQueryItem(name: "f", value: "jpg"))
                 queryItems.append(URLQueryItem(name: "crop", value: "1"))
                 
                 urlComponents?.queryItems = queryItems
                 thumbnailURL = urlComponents?.url?.absoluteString ?? imageURL
-                print("🖼️ Modified inline-header image URL: \(thumbnailURL ?? "nil")")
+                print("🖼️ Modified inline-header image URL for 58:13 ratio: \(thumbnailURL ?? "nil")")
             }
         }
         
         // Debug logging for inline-header content
-        if content.tags?.contains("inline-header") == true {
-            print("🖼️ Inline-header content debug:")
+        if content.type?.lowercased() == "inlineheader" || content.tags?.contains("inline-header") == true {
+            print("🖼️ INLINE-HEADER DEBUG:")
             print("🖼️ Title: \(content.title ?? content.name ?? "unknown")")
+            print("🖼️ Type: \(content.type ?? "nil")")
+            print("🖼️ Tags: \(content.tags ?? [])")
             print("🖼️ imageHref: \(content.imageHref ?? "nil")")
             print("🖼️ backgroundImageHref: \(content.backgroundImageHref ?? "nil")")
             print("🖼️ iconHref: \(content.iconHref ?? "nil")")
+            print("🖼️ imageIcon: \(content.imageIcon ?? "nil")")
             print("🖼️ imageFormat: \(content.imageFormat ?? "nil")")
             print("🖼️ ratio: \(content.ratio ?? "nil")")
             print("🖼️ Final thumbnailURL: \(thumbnailURL ?? "nil")")
+            print("🖼️ Used backgroundImageHref: \(thumbnailURL == content.backgroundImageHref)")
+            print("🖼️ ==================")
         }
         
         // Build description
@@ -359,12 +395,22 @@ final class ESPNWatchAPIParser {
         
         // Determine sport/league (legacy fields)
         let sport = extractSportFromContent(content)
-        let league = content.subtitle ?? "ESPN"
+        let league = extractLeagueFromContent(content) ?? "ESPN"
         
         // Extract new metadata fields
         let network = extractNetworkFromContent(content)
         let reAir = extractReAirFromContent(content)
         let eventName = extractEventNameFromContent(content)
+        
+        // Debug logging for metadata
+        print("🎯 Content: \(finalTitle)")
+        print("🎯 Network: \(network ?? "nil")")
+        print("🎯 League: \(league)")
+        print("🎯 ReAir: \(reAir ?? "nil")")
+        print("🎯 EventName: \(eventName ?? "nil")")
+        print("🎯 Subtitle: \(content.subtitle ?? "nil")")
+        print("🎯 EventType: \(content.eventType ?? "nil")")
+        print("🎯 ---")
         
         // Determine if metadata should be shown (not tile-only)
         let showMetadata = !(content.tags?.contains("tile-only") == true)
@@ -393,7 +439,8 @@ final class ESPNWatchAPIParser {
             type: content.type,
             network: network,
             reAir: reAir,
-            eventName: eventName
+            eventName: eventName,
+            ratio: content.ratio
         )
     }
     
@@ -444,6 +491,32 @@ final class ESPNWatchAPIParser {
         return "General"
     }
     
+    /// Parse formatted metadata from ESPN subtitle field
+    private static func parseFormattedMetadata(_ subtitle: String) -> (network: String?, league: String?) {
+        // ESPN API provides formatted metadata like "ESPN/ESPN+ • NCAA Baseball"
+        let components = subtitle.components(separatedBy: " • ")
+        
+        if components.count >= 2 {
+            let network = components[0].trimmingCharacters(in: .whitespaces)
+            let league = components.last?.trimmingCharacters(in: .whitespaces)
+            
+            // Filter out generic terms from league
+            if let league = league, !["General", "RE-AIR", "EN/ES", "ES"].contains(league) {
+                return (network: network, league: league)
+            } else {
+                return (network: network, league: nil)
+            }
+        } else {
+            // Single component, check if it's a network or league
+            let cleaned = subtitle.trimmingCharacters(in: .whitespaces)
+            if cleaned.contains("ESPN") || cleaned.contains("ACCN") || cleaned.contains("SECN") {
+                return (network: cleaned, league: nil)
+            } else {
+                return (network: nil, league: cleaned)
+            }
+        }
+    }
+    
     /// Extract network information from content
     private static func extractNetworkFromContent(_ content: ESPNWatchContent) -> String? {
         // Try streams array first (likely contains network info)
@@ -451,16 +524,36 @@ final class ESPNWatchAPIParser {
             return streams.first
         }
         
-        // Try subtitle as fallback (current league field)
-        if let subtitle = content.subtitle, !subtitle.isEmpty, subtitle != "ESPN" {
-            return subtitle
+        // Parse formatted subtitle
+        if let subtitle = content.subtitle, !subtitle.isEmpty {
+            let parsed = parseFormattedMetadata(subtitle)
+            return parsed.network
         }
         
         return nil
     }
     
+    /// Extract league/sport information for cleaner metadata display
+    private static func extractLeagueFromContent(_ content: ESPNWatchContent) -> String? {
+        // Parse formatted subtitle first
+        if let subtitle = content.subtitle, !subtitle.isEmpty {
+            let parsed = parseFormattedMetadata(subtitle)
+            if let league = parsed.league {
+                return league
+            }
+        }
+        
+        // Fallback to extracted sport
+        return extractSportFromContent(content)
+    }
+    
     /// Extract re-air information from content
     private static func extractReAirFromContent(_ content: ESPNWatchContent) -> String? {
+        // Check subtitle for RE-AIR indicator first
+        if let subtitle = content.subtitle, subtitle.contains("RE-AIR") {
+            return "Re-Air"
+        }
+        
         // Check if this is a repeat/re-air based on tags or other indicators
         if let tags = content.tags {
             if tags.contains("repeat") || tags.contains("reair") || tags.contains("replay") {
@@ -478,14 +571,18 @@ final class ESPNWatchAPIParser {
         return nil
     }
     
-    /// Extract event name from content (avoiding duplication with title)
+    /// Extract event name from content (avoiding duplication with title and filtering out generic terms)
     private static func extractEventNameFromContent(_ content: ESPNWatchContent) -> String? {
         // Determine what's being used as the title
         let usedAsTitle = content.title ?? content.name ?? content.headline ?? content.shortName
         
-        // Try eventType first (most specific for events)
+        // Try eventType, but filter out generic terms
         if let eventType = content.eventType, !eventType.isEmpty, eventType != usedAsTitle {
-            return eventType
+            let lowerEventType = eventType.lowercased()
+            // Skip generic event types that don't add value
+            if lowerEventType != "game" && lowerEventType != "match" && lowerEventType != "event" {
+                return eventType
+            }
         }
         
         // If we have a specific event name that's different from the title, use it

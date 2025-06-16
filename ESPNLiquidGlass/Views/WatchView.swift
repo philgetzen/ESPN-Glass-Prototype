@@ -314,7 +314,7 @@ struct VideoCategorySection: View {
                                     ))
                             }
                         }
-                        .aspectRatio(16/9, contentMode: .fit)
+                        .aspectRatio(getAspectRatio(for: video), contentMode: .fit)
                         .clipped()
                         
                         // Live badge overlay (lower left)
@@ -417,7 +417,14 @@ struct VideoCategorySection: View {
     }
     
     private var hasInlineHeaderTag: Bool {
-        category.tags.contains("inline-header")
+        let hasTag = category.tags.contains("inline-header")
+        if hasTag {
+            print("🎭 INLINE-HEADER CATEGORY DETECTED: '\(category.name)' with \(category.videos.count) videos")
+            for (index, video) in category.videos.enumerated() {
+                print("🎭 Video \(index): '\(video.title)' - thumbnailURL: \(video.thumbnailURL != nil ? "✅" : "❌")")
+            }
+        }
+        return hasTag
     }
     
     private var hasBreakoutRowTag: Bool {
@@ -477,10 +484,25 @@ struct VideoCategorySection: View {
         return lowerName == "channels" || lowerName.contains("network")
     }
     
+    private func getAspectRatio(for video: VideoItem) -> CGFloat {
+        // Check if this is inline-header content (should be 58:13 ratio)
+        if video.type?.lowercased() == "inlineheader" {
+            return 58.0 / 13.0  // ≈ 4.46:1
+        }
+        
+        // Default to 16:9 for regular hero content
+        return 16.0 / 9.0
+    }
+    
     @ViewBuilder
     private func videoCardForContent(video: VideoItem, onTap: @escaping () -> Void) -> some View {
-        // Check video-specific tags and types first
-        if video.tags.contains("rowCap") || shouldUseSquareForFirstItem(video) {
+        // Check for poster/movie content first (2:3)
+        if shouldUsePosterLayout(for: video) {
+            PosterVideoCard(video: video, onTap: onTap)
+        // Check for shows content (4:3)
+        } else if shouldUseShowLayout(for: video) {
+            ShowVideoCard(video: video, onTap: onTap)
+        } else if video.tags.contains("rowCap") || shouldUseSquareForFirstItem(video) {
             SquareThumbnailCard(video: video, onTap: onTap)
         } else if shouldUseCircleLayout(for: video) {
             CircleThumbnailCard(video: video, onTap: onTap)
@@ -490,6 +512,29 @@ struct VideoCategorySection: View {
             // Use size-based rendering as fallback
             videoCardForSize(video: video, onTap: onTap)
         }
+    }
+    
+    private func shouldUsePosterLayout(for video: VideoItem) -> Bool {
+        // Check if content has 2:3 ratio (movie poster) or is movie/film type
+        // Exclude categories that contain "shows" even if they also contain "originals"
+        let categoryName = category.name.lowercased()
+        let isShowCategory = categoryName.contains("shows")
+        
+        return !isShowCategory && (
+            video.ratio == "2:3" || 
+            video.type?.lowercased().contains("movie") == true ||
+            video.type?.lowercased().contains("film") == true ||
+            categoryName.contains("films") ||
+            categoryName.contains("spotlight") ||
+            categoryName.contains("originals")
+        )
+    }
+    
+    private func shouldUseShowLayout(for video: VideoItem) -> Bool {
+        // Check if content has 4:3 ratio or is show type
+        return video.ratio == "4:3" ||
+               video.type?.lowercased() == "show" ||
+               category.name.lowercased().contains("shows")
     }
     
     private func shouldUseSquareForFirstItem(_ video: VideoItem) -> Bool {
@@ -553,7 +598,7 @@ struct LargeVideoCard: View {
                         AsyncImage(url: url) { image in
                             image
                                 .resizable()
-                                .aspectRatio(contentMode: .fill)
+                                .aspectRatio(contentMode: .fit)
                         } placeholder: {
                             Rectangle()
                                 .fill(LinearGradient(
@@ -610,7 +655,6 @@ struct LargeVideoCard: View {
                             .foregroundColor(.white)
                             .lineLimit(2)
                             .multilineTextAlignment(.leading)
-                            .frame(width: 320, alignment: .leading)
                         
                         // Video metadata: Network, Re-Air (if applicable), Event Name
                         VStack(alignment: .leading, spacing: 2) {
@@ -619,9 +663,8 @@ struct LargeVideoCard: View {
                                 Text(buildMetadataText(for: video))
                                     .font(.system(size: 11))
                                     .foregroundColor(.gray)
-                                    .lineLimit(2)
+                                    .lineLimit(nil)
                                     .multilineTextAlignment(.leading)
-                                    .frame(width: 320, alignment: .leading)
                             }
                             
                             // Duration on separate line
@@ -653,21 +696,299 @@ struct LargeVideoCard: View {
     private func buildMetadataText(for video: VideoItem) -> String {
         var components: [String] = []
         
-        if let network = video.network {
+        // Add network if available and not generic
+        if let network = video.network, !network.isEmpty {
             components.append(network)
         }
         
+        // Add league/sport info if available and different from network
+        if let league = video.league, !league.isEmpty, league != "ESPN" {
+            // Don't duplicate if league is same as network
+            if video.network != league {
+                components.append(league)
+            }
+        }
+        
+        // Add re-air info if applicable
         if let reAir = video.reAir {
             components.append(reAir)
         }
         
-        if let eventName = video.eventName {
-            components.append(eventName)
-        }
-        
-        return components.joined(separator: " • ")
+        let result = components.joined(separator: " • ")
+        print("🎯 Metadata for '\(video.title)': '\(result)' (network: \(video.network ?? "nil"), league: \(video.league ?? "nil"))")
+        return result
     }
     
+}
+
+/// Poster video card: For 2:3 aspect ratio content like movies and shows
+struct PosterVideoCard: View {
+    let video: VideoItem
+    let onTap: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            VStack(alignment: .leading, spacing: 8) {
+                // Image container with 2:3 aspect ratio
+                Group {
+                    if let thumbnailURL = video.thumbnailURL, let url = URL(string: thumbnailURL) {
+                        AsyncImage(url: url) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                        } placeholder: {
+                            Rectangle()
+                                .fill(LinearGradient(
+                                    colors: [Color.gray.opacity(0.3), Color.gray.opacity(0.1)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ))
+                                .overlay(
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                )
+                        }
+                    } else {
+                        Rectangle()
+                            .fill(LinearGradient(
+                                colors: [Color.gray.opacity(0.3), Color.gray.opacity(0.1)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ))
+                    }
+                }
+                .frame(width: 120, height: 180) // 2:3 aspect ratio for posters
+                .clipped()
+                .cornerRadius(8)
+                .overlay(
+                    // Live indicator in lower left
+                    Group {
+                        if video.isLive {
+                            VStack {
+                                Spacer()
+                                HStack {
+                                    Text("LIVE")
+                                        .font(.system(size: 9))
+                                        .fontWeight(.bold)
+                                        .padding(.horizontal, 5)
+                                        .padding(.vertical, 2)
+                                        .background(Color.red)
+                                        .cornerRadius(3)
+                                        .foregroundColor(.white)
+                                    Spacer()
+                                }
+                            }
+                            .padding(6)
+                        }
+                    }
+                )
+                
+                // Show metadata only if enabled (respects parser showMetadata and tile-only tags)
+                if video.showMetadata && !video.tags.contains("tile-only") {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(video.title)
+                            .font(.system(size: 11))
+                            .fontWeight(.medium)
+                            .foregroundColor(.white)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.leading)
+                        
+                        // Video metadata: Network, Re-Air (if applicable), Event Name
+                        VStack(alignment: .leading, spacing: 2) {
+                            // Display metadata with proper wrapping
+                            if hasVideoMetadata(video) {
+                                Text(buildMetadataText(for: video))
+                                    .font(.system(size: 9))
+                                    .foregroundColor(.gray)
+                                    .lineLimit(nil)
+                                    .multilineTextAlignment(.leading)
+                            }
+                            
+                            // Duration on separate line
+                            if let duration = video.duration {
+                                Text(formatDuration(duration))
+                                    .font(.system(size: 9))
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                    }
+                }
+            }
+            .frame(width: 120)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+    
+    private func formatDuration(_ duration: TimeInterval) -> String {
+        let minutes = Int(duration) / 60
+        let seconds = Int(duration) % 60
+        return String(format: "%d:%02d", minutes, seconds)
+    }
+    
+    private func hasVideoMetadata(_ video: VideoItem) -> Bool {
+        return video.network != nil || video.reAir != nil || video.eventName != nil
+    }
+    
+    private func buildMetadataText(for video: VideoItem) -> String {
+        var components: [String] = []
+        
+        // Add network if available and not generic
+        if let network = video.network, !network.isEmpty {
+            components.append(network)
+        }
+        
+        // Add league/sport info if available and different from network
+        if let league = video.league, !league.isEmpty, league != "ESPN" {
+            // Don't duplicate if league is same as network
+            if video.network != league {
+                components.append(league)
+            }
+        }
+        
+        // Add re-air info if applicable
+        if let reAir = video.reAir {
+            components.append(reAir)
+        }
+        
+        let result = components.joined(separator: " • ")
+        print("🎯 Metadata for '\(video.title)': '\(result)' (network: \(video.network ?? "nil"), league: \(video.league ?? "nil"))")
+        return result
+    }
+}
+
+/// Show video card: For 4:3 aspect ratio content like shows
+struct ShowVideoCard: View {
+    let video: VideoItem
+    let onTap: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            VStack(alignment: .leading, spacing: 8) {
+                // Image container with 4:3 aspect ratio
+                Group {
+                    if let thumbnailURL = video.thumbnailURL, let url = URL(string: thumbnailURL) {
+                        AsyncImage(url: url) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                        } placeholder: {
+                            Rectangle()
+                                .fill(LinearGradient(
+                                    colors: [Color.gray.opacity(0.3), Color.gray.opacity(0.1)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ))
+                                .overlay(
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                )
+                        }
+                    } else {
+                        Rectangle()
+                            .fill(LinearGradient(
+                                colors: [Color.gray.opacity(0.3), Color.gray.opacity(0.1)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ))
+                    }
+                }
+                .frame(width: 160, height: 120) // 4:3 aspect ratio for shows
+                .clipped()
+                .cornerRadius(8)
+                .overlay(
+                    // Live indicator in lower left
+                    Group {
+                        if video.isLive {
+                            VStack {
+                                Spacer()
+                                HStack {
+                                    Text("LIVE")
+                                        .font(.system(size: 9))
+                                        .fontWeight(.bold)
+                                        .padding(.horizontal, 5)
+                                        .padding(.vertical, 2)
+                                        .background(Color.red)
+                                        .cornerRadius(3)
+                                        .foregroundColor(.white)
+                                    Spacer()
+                                }
+                            }
+                            .padding(6)
+                        }
+                    }
+                )
+                
+                // Show metadata only if enabled (respects parser showMetadata and tile-only tags)
+                if video.showMetadata && !video.tags.contains("tile-only") {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(video.title)
+                            .font(.system(size: 11))
+                            .fontWeight(.medium)
+                            .foregroundColor(.white)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.leading)
+                        
+                        // Video metadata: Network, Re-Air (if applicable), Event Name
+                        VStack(alignment: .leading, spacing: 2) {
+                            // Display metadata with proper wrapping
+                            if hasVideoMetadata(video) {
+                                Text(buildMetadataText(for: video))
+                                    .font(.system(size: 9))
+                                    .foregroundColor(.gray)
+                                    .lineLimit(nil)
+                                    .multilineTextAlignment(.leading)
+                            }
+                            
+                            // Duration on separate line
+                            if let duration = video.duration {
+                                Text(formatDuration(duration))
+                                    .font(.system(size: 9))
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                    }
+                }
+            }
+            .frame(width: 160)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+    
+    private func formatDuration(_ duration: TimeInterval) -> String {
+        let minutes = Int(duration) / 60
+        let seconds = Int(duration) % 60
+        return String(format: "%d:%02d", minutes, seconds)
+    }
+    
+    private func hasVideoMetadata(_ video: VideoItem) -> Bool {
+        return video.network != nil || video.reAir != nil || video.eventName != nil
+    }
+    
+    private func buildMetadataText(for video: VideoItem) -> String {
+        var components: [String] = []
+        
+        // Add network if available and not generic
+        if let network = video.network, !network.isEmpty {
+            components.append(network)
+        }
+        
+        // Add league/sport info if available and different from network
+        if let league = video.league, !league.isEmpty, league != "ESPN" {
+            // Don't duplicate if league is same as network
+            if video.network != league {
+                components.append(league)
+            }
+        }
+        
+        // Add re-air info if applicable
+        if let reAir = video.reAir {
+            components.append(reAir)
+        }
+        
+        let result = components.joined(separator: " • ")
+        print("🎯 Metadata for '\(video.title)': '\(result)' (network: \(video.network ?? "nil"), league: \(video.league ?? "nil"))")
+        return result
+    }
 }
 
 /// Medium video card: 2 cards + peek of 3rd (approximately 160px each + 32px peek)
@@ -684,7 +1005,7 @@ struct MediumVideoCard: View {
                         AsyncImage(url: url) { image in
                             image
                                 .resizable()
-                                .aspectRatio(contentMode: .fill)
+                                .aspectRatio(contentMode: .fit)
                         } placeholder: {
                             Rectangle()
                                 .fill(LinearGradient(
@@ -737,7 +1058,6 @@ struct MediumVideoCard: View {
                             .foregroundColor(.white)
                             .lineLimit(2)
                             .multilineTextAlignment(.leading)
-                            .frame(width: 160, alignment: .leading)
                         
                         // Video metadata: Network, Re-Air (if applicable), Event Name
                         VStack(alignment: .leading, spacing: 2) {
@@ -746,9 +1066,8 @@ struct MediumVideoCard: View {
                                 Text(buildMetadataText(for: video))
                                     .font(.system(size: 9))
                                     .foregroundColor(.gray)
-                                    .lineLimit(2)
+                                    .lineLimit(nil)
                                     .multilineTextAlignment(.leading)
-                                    .frame(width: 160, alignment: .leading)
                             }
                             
                             // Duration on separate line
@@ -779,19 +1098,27 @@ struct MediumVideoCard: View {
     private func buildMetadataText(for video: VideoItem) -> String {
         var components: [String] = []
         
-        if let network = video.network {
+        // Add network if available and not generic
+        if let network = video.network, !network.isEmpty {
             components.append(network)
         }
         
+        // Add league/sport info if available and different from network
+        if let league = video.league, !league.isEmpty, league != "ESPN" {
+            // Don't duplicate if league is same as network
+            if video.network != league {
+                components.append(league)
+            }
+        }
+        
+        // Add re-air info if applicable
         if let reAir = video.reAir {
             components.append(reAir)
         }
         
-        if let eventName = video.eventName {
-            components.append(eventName)
-        }
-        
-        return components.joined(separator: " • ")
+        let result = components.joined(separator: " • ")
+        print("🎯 Metadata for '\(video.title)': '\(result)' (network: \(video.network ?? "nil"), league: \(video.league ?? "nil"))")
+        return result
     }
     
 }
@@ -810,7 +1137,7 @@ struct SmallVideoCard: View {
                         AsyncImage(url: url) { image in
                             image
                                 .resizable()
-                                .aspectRatio(contentMode: .fill)
+                                .aspectRatio(contentMode: .fit)
                         } placeholder: {
                             Rectangle()
                                 .fill(LinearGradient(
@@ -863,15 +1190,14 @@ struct SmallVideoCard: View {
                             .foregroundColor(.white)
                             .lineLimit(2)
                             .multilineTextAlignment(.leading)
-                            .frame(width: 80, alignment: .leading)
                         
                         // Minimal metadata for small cards
                         if hasVideoMetadata(video) {
                             Text(buildMetadataText(for: video))
                                 .font(.system(size: 7))
                                 .foregroundColor(.gray)
-                                .lineLimit(1)
-                                .frame(width: 80, alignment: .leading)
+                                .lineLimit(2)
+                                .multilineTextAlignment(.leading)
                         }
                     }
                 }
@@ -888,19 +1214,27 @@ struct SmallVideoCard: View {
     private func buildMetadataText(for video: VideoItem) -> String {
         var components: [String] = []
         
-        if let network = video.network {
+        // Add network if available and not generic
+        if let network = video.network, !network.isEmpty {
             components.append(network)
         }
         
+        // Add league/sport info if available and different from network
+        if let league = video.league, !league.isEmpty, league != "ESPN" {
+            // Don't duplicate if league is same as network
+            if video.network != league {
+                components.append(league)
+            }
+        }
+        
+        // Add re-air info if applicable
         if let reAir = video.reAir {
             components.append(reAir)
         }
         
-        if let eventName = video.eventName {
-            components.append(eventName)
-        }
-        
-        return components.joined(separator: " • ")
+        let result = components.joined(separator: " • ")
+        print("🎯 Metadata for '\(video.title)': '\(result)' (network: \(video.network ?? "nil"), league: \(video.league ?? "nil"))")
+        return result
     }
 }
 

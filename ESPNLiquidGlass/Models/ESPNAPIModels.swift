@@ -386,3 +386,113 @@ struct ScoreboardResponse: Codable {
         }
     }
 }
+
+// MARK: - Video API Models
+
+/// Video category containing a collection of videos
+struct VideoCategory: Identifiable, Codable {
+    let id = UUID()
+    let name: String
+    let description: String
+    let videos: [VideoItem]
+    let isLive: Bool
+    let priority: Int
+    let tags: [String]
+    let showTitle: Bool
+    
+    enum CodingKeys: String, CodingKey {
+        case name, description, videos, isLive, priority, tags, showTitle
+    }
+}
+
+/// Individual video item within a category
+struct VideoItem: Identifiable, Codable, Equatable {
+    let id = UUID()
+    let title: String
+    let description: String?
+    let thumbnailURL: String?
+    let videoURL: String?
+    let duration: TimeInterval?
+    let publishedDate: Date
+    let sport: String?
+    let league: String?
+    let isLive: Bool
+    let viewCount: Int?
+    let tags: [String]
+    let autoplay: Bool
+    let showMetadata: Bool // Whether to show metadata beneath tile
+    let size: String? // Tile size: "lg", "md", "sm"
+    let type: String? // Content type from ESPN API
+    let network: String? // Network/channel information
+    let reAir: String? // Re-air information if applicable
+    let eventName: String? // Event name
+    
+    enum CodingKeys: String, CodingKey {
+        case title, description, thumbnailURL, videoURL, duration
+        case publishedDate, sport, league, isLive, viewCount, tags, autoplay, showMetadata, size, type
+        case network, reAir, eventName
+    }
+}
+
+/// Video category types
+enum VideoCategoryType: String, CaseIterable {
+    case live = "Live Now"
+    case highlights = "Game Highlights" 
+    case breakingNews = "Breaking News"
+    case analysis = "Analysis & Commentary"
+    case topVideos = "Top Videos"
+    case recentlyAdded = "Recently Added"
+    
+    var description: String {
+        switch self {
+        case .live:
+            return "Live streams and events happening now"
+        case .highlights:
+            return "Best moments and game highlights"
+        case .breakingNews:
+            return "Latest breaking sports news videos"
+        case .analysis:
+            return "Expert commentary and analysis"
+        case .topVideos:
+            return "Most popular sports videos"
+        case .recentlyAdded:
+            return "Latest videos added to the platform"
+        }
+    }
+    
+    var isLive: Bool {
+        return self == .live
+    }
+}
+
+// MARK: - Extensions for creating VideoItem from NewsArticle
+extension VideoItem {
+    init(from article: NewsArticle) {
+        self.title = article.headline ?? "Untitled Video"
+        self.description = article.description
+        self.thumbnailURL = article.images?.first?.url
+        self.videoURL = article.video?.first?.links?.source?.href
+        self.duration = article.video?.first?.duration.map { TimeInterval($0) }
+        
+        // Parse published date from string
+        if let publishedString = article.published {
+            let formatter = ISO8601DateFormatter()
+            self.publishedDate = formatter.date(from: publishedString) ?? Date()
+        } else {
+            self.publishedDate = Date()
+        }
+        
+        self.sport = article.categories?.first?.sportId.map { String($0) }
+        self.league = article.categories?.first?.league?.description
+        self.isLive = false // ESPN API videos are typically recorded content
+        self.viewCount = nil // Not available in ESPN API
+        self.tags = [] // Keywords not available in current NewsArticle model
+        self.autoplay = false // Default to no autoplay
+        self.showMetadata = true // Default to showing metadata
+        self.size = "md" // Default size for news articles
+        self.type = article.type // Content type from news article
+        self.network = nil // Not available in news articles
+        self.reAir = nil // Not available in news articles
+        self.eventName = nil // Not available in news articles
+    }
+}

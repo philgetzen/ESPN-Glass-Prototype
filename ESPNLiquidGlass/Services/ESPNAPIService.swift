@@ -1,15 +1,39 @@
 import Foundation
 
+// Custom delegate class to handle SSL certificate validation
+private final class ESPNURLSessionDelegate: NSObject, URLSessionDelegate {
+    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        // WARNING: This bypasses SSL certificate validation - ONLY for development!
+        if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
+            if let serverTrust = challenge.protectionSpace.serverTrust {
+                let credential = URLCredential(trust: serverTrust)
+                completionHandler(.useCredential, credential)
+                return
+            }
+        }
+        completionHandler(.performDefaultHandling, nil)
+    }
+}
+
 final class ESPNAPIService: Sendable {
     static let shared = ESPNAPIService()
     
     private let session: URLSession
     private let decoder: JSONDecoder
+    private let sessionDelegate = ESPNURLSessionDelegate()
     
     private init() {
-        self.session = URLSession.shared
+        // Initialize decoder
         self.decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
+        
+        // Create a custom URLSession configuration for development
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 30
+        config.timeoutIntervalForResource = 60
+        
+        // Create session with custom delegate for development
+        self.session = URLSession(configuration: config, delegate: sessionDelegate, delegateQueue: nil)
     }
     
     // Base URLs
@@ -20,6 +44,7 @@ final class ESPNAPIService: Sendable {
         case invalidURL
         case noData
         case decodingError
+        case invalidResponse
         case networkError(Error)
     }
     
@@ -188,5 +213,71 @@ final class ESPNAPIService: Sendable {
         default: return "sportscourt"
         }
     }
+    
+    // MARK: - Video Content Methods
+    
+    func fetchVideoContent() async throws -> [VideoCategory] {
+        print("🎬 Fetching video content from ESPN Watch API...")
+        
+        let watchAPIURL = "https://watch.product.api.espn.com/api/product/v3/watchespn/web/home?lang=en&features=continueWatching,flagship,pbov7,high-volume-row,watch-web-redesign,imageRatio58x13,promoTiles,openAuthz,video-header,explore-row,button-service,inline-header&headerBgImageWidth=1280&countryCode=US&tz=UTC-0400"
+        
+        guard let url = URL(string: watchAPIURL) else {
+            throw APIError.invalidURL
+        }
+        
+        do {
+            let (data, _) = try await session.data(from: url)
+            
+            // Parse the Watch API response using our parser
+            guard let response = ESPNWatchAPIParser.parseResponse(from: data) else {
+                throw APIError.invalidResponse
+            }
+            
+            guard let page = response.page,
+                  let buckets = page.buckets else {
+                print("❌ No buckets found in Watch API response")
+                return []
+            }
+            
+            print("🎬 Found \(buckets.count) buckets in Watch API response")
+            
+            // Convert buckets to video categories
+            var categories: [VideoCategory] = []
+            
+            for (bucketIndex, bucket) in buckets.enumerated() {
+                guard let bucketName = bucket.name,
+                      let contents = bucket.contents,
+                      !contents.isEmpty else {
+                    print("⏭️ Skipping empty bucket at index \(bucketIndex)")
+                    continue
+                }
+                
+                // Convert content items to video items
+                let videos = contents.compactMap { content in
+                    ESPNWatchAPIParser.convertToVideoItem(content)
+                }
+                
+                if !videos.isEmpty {
+                    let category = VideoCategory(
+                        name: bucketName,
+                        description: bucketName,
+                        videos: videos,
+                        isLive: videos.contains { $0.isLive },
+                        priority: bucketIndex,  // Use original bucket index
+                        tags: bucket.tags ?? [],
+                        showTitle: !(bucket.tags?.contains("inline-header") == true)
+                    )
+                    categories.append(category)
+                    print("✅ Created category '\(bucketName)' with \(videos.count) videos (bucket index: \(bucketIndex))")
+                }
+            }
+            
+            print("🎬 Created \(categories.count) video categories from ESPN Watch API")
+            return categories
+            
+        } catch {
+            print("❌ Failed to fetch video content from Watch API: \(error)")
+            throw error
+        }
+    }
 }
-

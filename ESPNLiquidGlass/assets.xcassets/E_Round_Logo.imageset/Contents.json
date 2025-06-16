@@ -1,17 +1,15 @@
 {
   "images" : [
     {
-      "filename" : "E_Round_Logo.png",
+      "filename" : "E_Logo_Circular.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "E_Round_Logo 1.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "E_Round_Logo 2.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

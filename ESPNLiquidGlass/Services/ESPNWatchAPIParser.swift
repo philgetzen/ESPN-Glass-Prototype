@@ -249,18 +249,9 @@ final class ESPNWatchAPIParser {
         // Merge bucket tags with content tags
         let allTags = contentTags + (bucketTags ?? [])
         
-        // Debug logging for tag merging
+        // Essential logging for inline-header buckets only
         if bucketTags?.contains("inline-header") == true {
-            print("🏷️ BUCKET TAG MERGE: '\(title ?? name ?? "unknown")'")
-            print("🏷️ Content tags: \(contentTags)")
-            print("🏷️ Bucket tags: \(bucketTags ?? [])")
-            print("🏷️ Merged tags: \(allTags)")
-            print("🏷️ RAW IMAGE DATA:")
-            print("🏷️   imageHref: \(data["imageHref"] ?? "nil")")
-            print("🏷️   backgroundImageHref: \(data["backgroundImageHref"] ?? "nil")")
-            print("🏷️   iconHref: \(data["iconHref"] ?? "nil")")
-            print("🏷️   imageIcon: \(data["imageIcon"] ?? "nil")")
-            print("🏷️   ALL KEYS: \(Array(data.keys).sorted())")
+            print("🏷️ INLINE-HEADER BUCKET: '\(title ?? name ?? "unknown")' - Type: \(data["type"] ?? "nil")")
         }
         
         // Create content object with all properties
@@ -363,21 +354,12 @@ final class ESPNWatchAPIParser {
             }
         }
         
-        // Debug logging for inline-header content
-        if content.type?.lowercased() == "inlineheader" || content.tags?.contains("inline-header") == true {
-            print("🖼️ INLINE-HEADER DEBUG:")
-            print("🖼️ Title: \(content.title ?? content.name ?? "unknown")")
-            print("🖼️ Type: \(content.type ?? "nil")")
-            print("🖼️ Tags: \(content.tags ?? [])")
-            print("🖼️ imageHref: \(content.imageHref ?? "nil")")
-            print("🖼️ backgroundImageHref: \(content.backgroundImageHref ?? "nil")")
-            print("🖼️ iconHref: \(content.iconHref ?? "nil")")
-            print("🖼️ imageIcon: \(content.imageIcon ?? "nil")")
-            print("🖼️ imageFormat: \(content.imageFormat ?? "nil")")
-            print("🖼️ ratio: \(content.ratio ?? "nil")")
-            print("🖼️ Final thumbnailURL: \(thumbnailURL ?? "nil")")
-            print("🖼️ Used backgroundImageHref: \(thumbnailURL == content.backgroundImageHref)")
-            print("🖼️ ==================")
+        // Essential logging for inline-header content only
+        if content.type?.lowercased() == "inlineheader" {
+            print("🖼️ INLINE-HEADER: \(content.title ?? content.name ?? "unknown")")
+            print("🖼️   Type: \(content.type ?? "nil")")
+            print("🖼️   backgroundImageHref: \(content.backgroundImageHref ?? "nil")")
+            print("🖼️   Final thumbnailURL: \(thumbnailURL ?? "nil")")
         }
         
         // Build description
@@ -402,15 +384,6 @@ final class ESPNWatchAPIParser {
         let reAir = extractReAirFromContent(content)
         let eventName = extractEventNameFromContent(content)
         
-        // Debug logging for metadata
-        print("🎯 Content: \(finalTitle)")
-        print("🎯 Network: \(network ?? "nil")")
-        print("🎯 League: \(league)")
-        print("🎯 ReAir: \(reAir ?? "nil")")
-        print("🎯 EventName: \(eventName ?? "nil")")
-        print("🎯 Subtitle: \(content.subtitle ?? "nil")")
-        print("🎯 EventType: \(content.eventType ?? "nil")")
-        print("🎯 ---")
         
         // Determine if metadata should be shown (not tile-only)
         let showMetadata = !(content.tags?.contains("tile-only") == true)

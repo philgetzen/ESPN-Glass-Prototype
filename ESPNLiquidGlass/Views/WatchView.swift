@@ -127,6 +127,160 @@ struct WatchView: View {
     }
 }
 
+// MARK: - Inline Header Card Component
+struct InlineHeaderCard: View {
+    let category: VideoCategory
+    let video: VideoItem
+    let onTap: () -> Void
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // Image section (just image, no overlays) - fixed frame to prevent layout jump
+            Button(action: onTap) {
+                Group {
+                    if let thumbnailURL = video.thumbnailURL, let url = URL(string: thumbnailURL) {
+                        AsyncImage(url: url) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            Rectangle()
+                                .fill(LinearGradient(
+                                    colors: [Color.blue.opacity(0.6), Color.purple.opacity(0.4)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ))
+                                .overlay(
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                )
+                        }
+                    } else {
+                        Rectangle()
+                            .fill(LinearGradient(
+                                colors: [Color.blue.opacity(0.6), Color.purple.opacity(0.4)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ))
+                    }
+                }
+                .frame(height: 180) // Fixed height based on typical 58:13 ratio
+                .clipped()
+            }
+            .buttonStyle(PlainButtonStyle())
+            
+            // Bottom section with ALL content
+            VStack(alignment: .leading, spacing: 16) {
+                // Main content section
+                VStack(alignment: .leading, spacing: 12) {
+                    // Category name (like "NBA Finals")
+                    Text(category.name)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                        .lineLimit(2)
+                    
+                    // Category description (like "The stage is set...") - only if different from name
+                    if !category.description.isEmpty && category.description != category.name {
+                        Text(category.description)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .lineLimit(3)
+                    }
+                }
+                
+                // Status button
+                Button(action: onTap) {
+                    if video.isLive {
+                        Text("LIVE")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(Color.red)
+                            .cornerRadius(25)
+                    } else {
+                        Text("Upcoming")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(Color.blue.opacity(0.8))
+                            .cornerRadius(25)
+                    }
+                }
+                .buttonStyle(PlainButtonStyle())
+                
+                // Metadata section - single line like other tiles
+                HStack {
+                    Text("ESPN")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    
+                    if let league = video.league {
+                        Text("•")
+                            .font(.caption)
+                            .foregroundColor(.secondary.opacity(0.6))
+                        Text(league.uppercased())
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .foregroundColor(.red)
+                    }
+                    
+                    if let network = video.network {
+                        Text("•")
+                            .font(.caption)
+                            .foregroundColor(.secondary.opacity(0.6))
+                        Text(network)
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .foregroundColor(.purple)
+                    }
+                    
+                    // Only show date if it's not "in 0s"
+                    let dateText = formatVideoDate(video.publishedDate)
+                    if !dateText.contains("0s") {
+                        Text("•")
+                            .font(.caption)
+                            .foregroundColor(.secondary.opacity(0.6))
+                        
+                        Text(dateText)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    Spacer()
+                    
+                    // Duration if available
+                    if let duration = video.duration {
+                        Text(formatDuration(duration))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+        }
+        .liquidGlassCard(cornerRadius: 12, density: .light)
+        .padding(.horizontal)
+    }
+    
+    private func formatVideoDate(_ date: Date) -> String {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .abbreviated
+        return formatter.localizedString(for: date, relativeTo: Date())
+    }
+    
+    private func formatDuration(_ duration: TimeInterval) -> String {
+        let minutes = Int(duration) / 60
+        let seconds = Int(duration) % 60
+        return String(format: "%d:%02d", minutes, seconds)
+    }
+}
+
 // MARK: - Hero Video Card Component
 struct HeroVideoCard: View {
     let video: VideoItem
@@ -270,110 +424,119 @@ struct VideoCategorySection: View {
     
     private var heroTileView: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Category header (if should show title)
-            if shouldShowTitle {
-                HStack {
-                    Text(category.name)
-                        .font(.headline)
-                        .foregroundColor(.white)
-                    
-                    Spacer()
+            // For inline header rows, use the dedicated InlineHeaderCard component
+            if hasInlineHeaderTag {
+                if let video = category.videos.first {
+                    InlineHeaderCard(category: category, video: video) {
+                        onVideoTap(video)
+                    }
                 }
-                .padding(.horizontal)
-            }
-            
-            // Large hero tile
-            if let video = category.videos.first {
-                Button(action: { onVideoTap(video) }) {
-                    ZStack {
-                        // Thumbnail with fixed aspect ratio
-                        Group {
-                            if let thumbnailURL = video.thumbnailURL, let url = URL(string: thumbnailURL) {
-                                AsyncImage(url: url) { image in
-                                    image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fill)
-                                } placeholder: {
+            } else {
+                // Standard hero tile behavior for non-inline headers
+                if shouldShowTitle {
+                    HStack {
+                        Text(category.name)
+                            .font(.headline)
+                            .foregroundColor(.white)
+                        
+                        Spacer()
+                    }
+                    .padding(.horizontal)
+                }
+                
+                // Large hero tile
+                if let video = category.videos.first {
+                    Button(action: { onVideoTap(video) }) {
+                        ZStack {
+                            // Thumbnail with fixed aspect ratio
+                            Group {
+                                if let thumbnailURL = video.thumbnailURL, let url = URL(string: thumbnailURL) {
+                                    AsyncImage(url: url) { image in
+                                        image
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fill)
+                                    } placeholder: {
+                                        Rectangle()
+                                            .fill(LinearGradient(
+                                                colors: [Color.blue.opacity(0.6), Color.purple.opacity(0.4)],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            ))
+                                            .overlay(
+                                                ProgressView()
+                                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                            )
+                                    }
+                                } else {
                                     Rectangle()
                                         .fill(LinearGradient(
                                             colors: [Color.blue.opacity(0.6), Color.purple.opacity(0.4)],
                                             startPoint: .topLeading,
                                             endPoint: .bottomTrailing
                                         ))
-                                        .overlay(
-                                            ProgressView()
-                                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                        )
                                 }
-                            } else {
-                                Rectangle()
-                                    .fill(LinearGradient(
-                                        colors: [Color.blue.opacity(0.6), Color.purple.opacity(0.4)],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    ))
                             }
-                        }
-                        .aspectRatio(getAspectRatio(for: video), contentMode: .fit)
-                        .clipped()
-                        
-                        // Live badge overlay (lower left)
-                        Group {
-                            if video.isLive {
-                                VStack {
-                                    Spacer()
-                                    HStack {
-                                        Text("LIVE")
-                                            .font(.system(size: 10))
-                                            .fontWeight(.bold)
-                                            .padding(.horizontal, 6)
-                                            .padding(.vertical, 2)
-                                            .background(Color.red)
-                                            .cornerRadius(4)
-                                            .foregroundColor(.white)
-                                        Spacer()
-                                    }
-                                }
-                                .padding(8)
-                            }
-                        }
-                        
-                        // Content overlay
-                        VStack {
-                            Spacer()
+                            .aspectRatio(getAspectRatio(for: video), contentMode: .fit)
+                            .clipped()
                             
-                            HStack {
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text(video.title)
-                                        .font(.title2)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.white)
-                                        .lineLimit(2)
-                                    
-                                    if let description = video.description {
-                                        Text(description)
-                                            .font(.subheadline)
-                                            .foregroundColor(.gray)
-                                            .lineLimit(2)
+                            // Live badge overlay (lower left)
+                            Group {
+                                if video.isLive {
+                                    VStack {
+                                        Spacer()
+                                        HStack {
+                                            Text("LIVE")
+                                                .font(.system(size: 10))
+                                                .fontWeight(.bold)
+                                                .padding(.horizontal, 6)
+                                                .padding(.vertical, 2)
+                                                .background(Color.red)
+                                                .cornerRadius(4)
+                                                .foregroundColor(.white)
+                                            Spacer()
+                                        }
                                     }
+                                    .padding(8)
                                 }
-                                
-                                Spacer()
                             }
-                            .padding()
-                            .background(
-                                LinearGradient(
-                                    colors: [Color.black.opacity(0.9), Color.clear],
-                                    startPoint: .bottom,
-                                    endPoint: .top
+                            
+                            // Content overlay for standard hero tiles
+                            VStack {
+                                Spacer()
+                                
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        Text(video.title)
+                                            .font(.title2)
+                                            .fontWeight(.bold)
+                                            .foregroundColor(.white)
+                                            .lineLimit(2)
+                                        
+                                        if let description = video.description {
+                                            Text(description)
+                                                .font(.subheadline)
+                                                .foregroundColor(.gray)
+                                                .lineLimit(2)
+                                        }
+                                    }
+                                    
+                                    Spacer()
+                                }
+                                .padding()
+                                .background(
+                                    LinearGradient(
+                                        colors: [Color.black.opacity(0.9), Color.clear],
+                                        startPoint: .bottom,
+                                        endPoint: .top
+                                    )
                                 )
-                            )
+                            }
                         }
+                        .cornerRadius(12)
+                        .padding(.horizontal)
                     }
-                    .cornerRadius(12)
-                    .padding(.horizontal)
+                    .buttonStyle(PlainButtonStyle())
                 }
-                .buttonStyle(PlainButtonStyle())
             }
         }
     }

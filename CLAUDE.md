@@ -28,6 +28,7 @@ This is an ESPN-style sports app prototype with a liquid glass design aesthetic.
 
 #### Working Features
 ✅ **ESPN API Integration**: Real data from ESPN's scoreboard and news APIs  
+✅ **ESPN Watch API**: Video content loading from proper Watch API endpoint  
 ✅ **Smart Image Selection**: Automatically chooses best aspect ratio images  
 ✅ **Date Pagination**: Week-by-week navigation with smooth animations  
 ✅ **Start Times**: Proper parsing and display of game times  
@@ -106,6 +107,31 @@ open ESPNLiquidGlass.xcodeproj
 - `LiquidGlassEffects.swift`: Custom glass-like visual effects
 
 This session focused heavily on data parsing, image handling, and UI polish. The core functionality is solid with real ESPN integration working well.
+
+## Watch API Restoration (June 16, 2025)
+
+### Issue Resolution
+- **Problem**: Watch tab was using News API workaround instead of proper ESPN Watch API, leading to TLS errors
+- **Root Cause**: `fetchVideoContent()` method was replaced with News API fallback during previous session
+- **Solution**: Restored proper Watch API implementation using existing TLS infrastructure
+
+### Technical Details
+- **Watch API Endpoint**: `https://watch.product.api.espn.com/api/product/v3/watchespn/web/home?lang=en&features=continueWatching,flagship,pbov7,high-volume-row,watch-web-redesign,imageRatio58x13,promoTiles,openAuthz,video-header,explore-row,button-service,inline-header&headerBgImageWidth=1280&countryCode=US&tz=UTC-0400`
+- **TLS Solution Already In Place**: 
+  - Custom `ESPNURLSessionDelegate` bypasses SSL certificate validation (ESPNAPIService.swift:4-16)
+  - ATS exceptions configured in Info.plist (lines 51-59)
+  - URLSession properly configured with custom delegate (line 36)
+- **Parser Integration**: Using existing `ESPNWatchAPIParser` to convert API response to `VideoCategory` models
+
+### Files Modified
+- `ESPNAPIService.swift:218-280`: Replaced News API workaround with proper Watch API call
+- `ESPNAPIService.swift:47`: Added missing `APIError.invalidResponse` case
+- `CLAUDE.md`: Updated to reflect Watch API restoration
+
+### Current Status
+✅ **Watch tab fully functional** with real ESPN video content
+✅ **TLS/SSL issues resolved** using existing infrastructure
+✅ **Video categories displaying** properly from Watch API buckets
 
 ## Component Creation Guidelines
 

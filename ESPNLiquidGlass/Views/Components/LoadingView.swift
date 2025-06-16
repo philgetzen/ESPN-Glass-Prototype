@@ -12,12 +12,10 @@ struct LoadingView: View {
     // MARK: - Body
     var body: some View {
         VStack(spacing: 16) {
-            ProgressView()
-                .scaleEffect(1.5)
-                .progressViewStyle(CircularProgressViewStyle(tint: .primary))
+            ESPNAnimatedLoadingIcon(size: 60)
                 .glowEffect(
-                    color: .blue,
-                    radius: 10,
+                    color: .red,
+                    radius: 8,
                     intensity: .medium,
                     pulsation: .gentle
                 )

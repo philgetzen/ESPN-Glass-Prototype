@@ -22,9 +22,7 @@ struct VideoPlayerView: View {
                         }
                 } else {
                     VStack(spacing: 20) {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            .scaleEffect(1.5)
+                        ESPNAnimatedLoadingIcon(size: 45)
                         
                         Text("Loading video...")
                             .foregroundColor(.white)

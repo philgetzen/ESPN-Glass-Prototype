@@ -99,7 +99,7 @@ struct MoreView: View {
                         }
                     }
                     
-                    Divider()
+                     Divider()
                         .background(Color.gray.opacity(0.3))
                     
                     // ESPN BET Section
@@ -186,7 +186,19 @@ struct MoreView: View {
                 SettingsView(colorScheme: $colorScheme)
                     .preferredColorScheme(colorScheme)
             }
+            .refreshableWithHaptics {
+                await refreshMoreContent()
+            }
         }
+    }
+    
+    private func refreshMoreContent() async {
+        // Simulate network delay
+        try? await Task.sleep(nanoseconds: 1_500_000_000)
+        
+        // In a real app, this would refresh favorites and sports data
+        // For now, we just simulate the refresh
+        print("Refreshed more content")
     }
 }
 

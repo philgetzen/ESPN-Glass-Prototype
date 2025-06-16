@@ -6,6 +6,7 @@ struct ScoresView: View {
     @State private var selectedSports: Set<String> = ["Top Events"]
     @State private var showSettings = false
     @State private var currentWeekOffset = 0
+    @State private var isRefreshing = false
     @Binding var colorScheme: ColorScheme?
     @Environment(\.colorScheme) private var environmentColorScheme
     
@@ -72,6 +73,10 @@ struct ScoresView: View {
                     switch viewState {
                     case .loading:
                         LoadingView()
+                            .onAppear {
+                                // Ensure refresh overlay is off during initial loading
+                                isRefreshing = false
+                            }
                         
                     case .loaded(_):
                         if filteredSportsData.isEmpty {
@@ -114,8 +119,15 @@ struct ScoresView: View {
             .task {
                 await loadScores()
             }
-            .refreshable {
+            .espnPullToRefreshOverlay(isRefreshing: isRefreshing, topOffset: 135)
+            .refreshableWithHaptics {
+                await MainActor.run { isRefreshing = true }
+                // Add delay to ensure refresh indicator shows
+                try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
                 await loadScores()
+                // Keep indicator visible longer after completion
+                try? await Task.sleep(nanoseconds: 800_000_000) // 0.8 seconds
+                await MainActor.run { isRefreshing = false }
             }
             .sheet(isPresented: $showSettings) {
                 SettingsView(colorScheme: $colorScheme)
@@ -252,8 +264,13 @@ struct ScoresView: View {
     }
     
     private func loadScores() async {
+        // Only show loading state if we don't have scores yet
         await MainActor.run {
-            viewState = .loading
+            if case .loaded(_) = viewState {
+                // Keep existing scores during refresh
+            } else {
+                viewState = .loading
+            }
         }
         
         let sports = selectedSports.contains("Top Events") ? ["NBA", "WNBA", "PGA", "MLB", "NHL", "NCAAF", "NCAAM", "MLS"] : Array(selectedSports)
@@ -430,7 +447,7 @@ struct GamesList: View {
                     Rectangle()
                         .frame(height: 1)
                         .foregroundColor(Color.primary.opacity(0.15))
-                        .shadow(color: .black.opacity(0.1), radius: 0.5, x: 0, y: 0.5),
+                        .shadow(color: .black.opacity(0.2), radius: 0.5, x: 0, y: 0.5),
                     alignment: .bottom
                 )
                 
@@ -450,12 +467,9 @@ struct GamesList: View {
                     }
                 }
             }
-            .background(Color.clear)
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color.primary.opacity(0.15), lineWidth: 1)
-            )
             .liquidGlassCard(cornerRadius: 16, density: .medium)
+            .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
+            .shadow(color: Color.black.opacity(0.1), radius: 16, x: 0, y: 8)
             .padding(.horizontal, 16)
         }
     }

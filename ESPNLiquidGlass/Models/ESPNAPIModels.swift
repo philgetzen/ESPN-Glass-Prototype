@@ -426,11 +426,12 @@ struct VideoItem: Identifiable, Codable, Equatable {
     let network: String? // Network/channel information
     let reAir: String? // Re-air information if applicable
     let eventName: String? // Event name
+    let ratio: String? // Aspect ratio from ESPN API (e.g., "2:3", "16:9")
     
     enum CodingKeys: String, CodingKey {
         case title, description, thumbnailURL, videoURL, duration
         case publishedDate, sport, league, isLive, viewCount, tags, autoplay, showMetadata, size, type
-        case network, reAir, eventName
+        case network, reAir, eventName, ratio
     }
 }
 
@@ -494,5 +495,6 @@ extension VideoItem {
         self.network = nil // Not available in news articles
         self.reAir = nil // Not available in news articles
         self.eventName = nil // Not available in news articles
+        self.ratio = nil // Not available in news articles
     }
 }

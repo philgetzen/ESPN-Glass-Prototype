@@ -165,7 +165,7 @@ final class ESPNWatchAPIParser {
                         print("📦 Found \(contentsArray.count) items in bucket '\(bucketName)'")
                         
                         for contentData in contentsArray {
-                            if let content = parseContent(from: contentData, bucketTags: bucketTags) {
+                            if let content = parseContent(from: contentData, bucketTags: bucketTags, bucketData: bucketData) {
                                 contents.append(content)
                             }
                         }
@@ -186,7 +186,7 @@ final class ESPNWatchAPIParser {
     }
     
     /// Parses individual content item
-    private static func parseContent(from data: [String: Any], bucketTags: [String]? = nil) -> ESPNWatchContent? {
+    private static func parseContent(from data: [String: Any], bucketTags: [String]? = nil, bucketData: [String: Any]? = nil) -> ESPNWatchContent? {
         // Extract all the fields we care about
         let id = data["id"] as? String
         let type = data["type"] as? String
@@ -201,11 +201,24 @@ final class ESPNWatchAPIParser {
         
         // Handle nested backgroundImage object
         var backgroundImageHref: String?
-        if let backgroundImageData = data["backgroundImage"] as? [String: Any],
-           let href = backgroundImageData["href"] as? String {
-            backgroundImageHref = href
-        } else {
-            backgroundImageHref = data["backgroundImageHref"] as? String
+        
+        // For inline-header content, check bucket-level backgroundImage first
+        if type?.lowercased() == "inlineheader", let bucketData = bucketData {
+            if let bucketBackgroundImage = bucketData["backgroundImage"] as? [String: Any],
+               let href = bucketBackgroundImage["href"] as? String {
+                backgroundImageHref = href
+                print("🖼️ Found bucket-level backgroundImage for inline-header: \(href)")
+            }
+        }
+        
+        // Fallback to content-level backgroundImage
+        if backgroundImageHref == nil {
+            if let backgroundImageData = data["backgroundImage"] as? [String: Any],
+               let href = backgroundImageData["href"] as? String {
+                backgroundImageHref = href
+            } else {
+                backgroundImageHref = data["backgroundImageHref"] as? String
+            }
         }
         
         let iconHref = data["iconHref"] as? String
@@ -261,11 +274,15 @@ final class ESPNWatchAPIParser {
         // Essential logging for inline-header buckets only
         if bucketTags?.contains("inline-header") == true {
             print("🏷️ INLINE-HEADER BUCKET: '\(title ?? name ?? "unknown")' - Type: \(data["type"] ?? "nil")")
-            print("🏷️   Available keys: \(Array(data.keys).sorted())")
-            print("🏷️   Image-related fields:")
-            for key in data.keys.sorted() {
-                if key.lowercased().contains("image") || key.lowercased().contains("icon") || key.lowercased().contains("href") {
-                    print("🏷️     \(key): \(data[key] ?? "nil")")
+            print("🏷️   RAW DATA DUMP:")
+            for key in Array(data.keys).sorted() {
+                let value = data[key]
+                if let dict = value as? [String: Any] {
+                    print("🏷️     \(key): [DICT] \(dict)")
+                } else if let array = value as? [Any] {
+                    print("🏷️     \(key): [ARRAY] \(array)")
+                } else {
+                    print("🏷️     \(key): \(value ?? "nil")")
                 }
             }
         }

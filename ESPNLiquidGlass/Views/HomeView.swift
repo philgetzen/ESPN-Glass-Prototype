@@ -5,9 +5,12 @@ struct HomeView: View {
     @State private var selectedArticle: Article?
     @State private var selectedVideoArticle: Article?
     @State private var showSettings = false
+    @State private var isRefreshing = false
+    @State private var lastRefreshTime: Date?
     @Binding var colorScheme: ColorScheme?
     
     private let apiService = ESPNAPIService.shared
+    private let refreshInterval: TimeInterval = 300 // 5 minutes
     
     var body: some View {
         NavigationStack {
@@ -15,6 +18,10 @@ struct HomeView: View {
                 switch viewState {
                 case .loading:
                     LoadingView("Loading articles...")
+                        .onAppear {
+                            // Ensure refresh overlay is off during initial loading
+                            isRefreshing = false
+                        }
                     
                 case .loaded(let articles):
                     ScrollView {
@@ -38,7 +45,7 @@ struct HomeView: View {
                     .safeAreaInset(edge: .bottom) { Spacer().frame(height: 60) }
                     
                 case .error(let errorMessage):
-                    ErrorView(error: errorMessage, retry: loadArticles)
+                    ErrorView(error: errorMessage, retry: { await loadArticlesIfNeeded(force: true) })
                     
                 case .empty:
                     EmptyStateView(
@@ -72,22 +79,48 @@ struct HomeView: View {
                     .preferredColorScheme(colorScheme)
             }
             .task {
-                await loadArticles()
+                await loadArticlesIfNeeded(force: false)
             }
-            .refreshable {
-                await loadArticles()
+            .refreshableWithHaptics {
+                await MainActor.run { isRefreshing = true }
+                // Add delay to ensure refresh indicator shows
+                try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+                await loadArticlesIfNeeded(force: true)
+                // Keep indicator visible longer after completion
+                try? await Task.sleep(nanoseconds: 800_000_000) // 0.8 seconds
+                await MainActor.run { isRefreshing = false }
             }
         }
+        .espnPullToRefreshOverlay(isRefreshing: isRefreshing, topOffset: 120)
     }
     
-    private func loadArticles() async {
+    private func loadArticlesIfNeeded(force: Bool) async {
+        // Check if we need to refresh
+        let needsRefresh = force || shouldRefresh()
+        
+        if !needsRefresh {
+            print("📰 Using cached articles (last refresh: \(Int(Date().timeIntervalSince(lastRefreshTime ?? Date.distantPast)))s ago)")
+            return
+        }
+        
+        print("🔄 Starting refresh... (force: \(force))")
+        
+        // Only show loading state if we don't have articles yet
         await MainActor.run {
-            viewState = .loading
+            if case .loaded(_) = viewState {
+                // Keep existing articles during refresh
+                print("📰 Keeping existing articles during refresh")
+            } else {
+                viewState = .loading
+                print("⏳ Showing loading state")
+            }
         }
         
         do {
+            print("🌐 Fetching articles from ESPN API...")
             // Fetch general news feed
             let newsArticles = try await apiService.fetchNewsFeed(limit: 30)
+            print("✅ Fetched \(newsArticles.count) articles")
             
             // Convert API articles to our Article model
             let convertedArticles = newsArticles.map { Article(from: $0) }
@@ -96,15 +129,35 @@ struct HomeView: View {
             await MainActor.run {
                 if convertedArticles.isEmpty {
                     viewState = .empty
+                    print("📭 No articles found")
                 } else {
                     viewState = .loaded(convertedArticles)
+                    lastRefreshTime = Date()
+                    print("📰 Updated with \(convertedArticles.count) articles at \(Date())")
                 }
             }
         } catch {
+            print("❌ Error loading articles: \(error)")
             await MainActor.run {
-                viewState = .error(error.localizedDescription)
+                // Only show error if we don't have cached articles
+                if case .loading = viewState {
+                    viewState = .error(error.localizedDescription)
+                } else {
+                    print("📰 Keeping cached articles due to error")
+                }
             }
         }
+        
+        print("✨ Refresh complete")
+    }
+    
+    private func shouldRefresh() -> Bool {
+        guard let lastRefresh = lastRefreshTime else {
+            return true // First time loading
+        }
+        
+        let timeSinceRefresh = Date().timeIntervalSince(lastRefresh)
+        return timeSinceRefresh >= refreshInterval
     }
 }
 

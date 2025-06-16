@@ -4,9 +4,12 @@ struct WatchView: View {
     @State private var viewState = WatchViewState.loading
     @State private var selectedVideoItem: VideoItem?
     @State private var showSettings = false
+    @State private var isRefreshing = false
+    @State private var lastRefreshTime: Date?
     @Binding var colorScheme: ColorScheme?
     
     private let apiService = ESPNAPIService.shared
+    private let refreshInterval: TimeInterval = 300 // 5 minutes
     
     var body: some View {
         NavigationStack {
@@ -14,6 +17,10 @@ struct WatchView: View {
                 switch viewState {
                 case .loading:
                     LoadingView("Loading videos...")
+                        .onAppear {
+                            // Ensure refresh overlay is off during initial loading
+                            isRefreshing = false
+                        }
                     
                 case .loaded(let categories):
                     ScrollView {
@@ -25,13 +32,14 @@ struct WatchView: View {
                                         selectedVideoItem = video
                                     }
                                 }
+                                .preferredColorScheme(.dark)
                             }
                         }
                         .padding(.vertical)
                     }
                     
                 case .error(let errorMessage):
-                    ErrorView(error: errorMessage, retry: loadVideoContent)
+                    ErrorView(error: errorMessage, retry: { await loadVideoContentIfNeeded(force: true) })
                     
                 case .empty:
                     EmptyStateView(
@@ -51,13 +59,14 @@ struct WatchView: View {
                     )
                     .ignoresSafeArea(.all)
             )
+            .adaptiveBackground()
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(.regularMaterial, for: .navigationBar)
             .toolbarColorScheme(.dark, for: .navigationBar)
             .espnToolbar(
                 isDarkMode: true,
                 onSettingsTap: { showSettings = true }
             )
+            .id("watch-toolbar")
             .sheet(isPresented: $showSettings) {
                 SettingsView(colorScheme: $colorScheme)
                     .preferredColorScheme(colorScheme)
@@ -70,25 +79,42 @@ struct WatchView: View {
             }
         }
         .refreshableWithHaptics {
-            await loadVideoContent()
+            await MainActor.run { isRefreshing = true }
+            // Add delay to ensure refresh indicator shows
+            try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+            await loadVideoContentIfNeeded(force: true)
+            // Keep indicator visible longer after completion
+            try? await Task.sleep(nanoseconds: 800_000_000) // 0.8 seconds
+            await MainActor.run { isRefreshing = false }
         }
         .preferredColorScheme(.dark)
         .task {
-            await loadVideoContent()
+            await loadVideoContentIfNeeded(force: false)
         }
+        .espnPullToRefreshOverlay(isRefreshing: isRefreshing, topOffset: 120)
     }
     
-    private func loadVideoContent() async {
+    private func loadVideoContentIfNeeded(force: Bool) async {
+        // Check if we need to refresh
+        let needsRefresh = force || shouldRefresh()
+        
+        if !needsRefresh {
+            print("🎬 Using cached video content (last refresh: \(Int(Date().timeIntervalSince(lastRefreshTime ?? Date.distantPast)))s ago)")
+            return
+        }
+        
+        print("🎬 Starting video content fetch... (force: \(force))")
+        
         await MainActor.run {
             if case .loaded(_) = viewState {
                 // Keep existing content during refresh
+                print("🎬 Keeping existing content during refresh")
             } else {
                 viewState = .loading
             }
         }
         
         do {
-            print("🎬 Starting video content fetch at \(Date())...")
             let categories = try await apiService.fetchVideoContent()
             
             await MainActor.run {
@@ -96,29 +122,30 @@ struct WatchView: View {
                     viewState = .empty
                 } else {
                     viewState = .loaded(categories)
+                    lastRefreshTime = Date()
                     print("🎬 Loaded \(categories.count) video categories at \(Date())")
-                    
-                    // Debug: Check data freshness for each category
-                    for (index, category) in categories.enumerated() {
-                        let liveCount = category.videos.filter { $0.isLive }.count
-                        let totalCount = category.videos.count
-                        let mostRecentDate = category.videos.map { $0.publishedDate }.max() ?? Date.distantPast
-                        let timeSinceLatest = Date().timeIntervalSince(mostRecentDate)
-                        
-                        print("📊 Category \(index): '\(category.name)' - \(totalCount) videos (\(liveCount) live) - Latest content: \(timeSinceLatest/3600)h ago")
-                        
-                        if index == 3 {
-                            print("🔍 Also Live row (bucket 3) - Priority: \(category.priority), Tags: \(category.tags)")
-                        }
-                    }
                 }
             }
         } catch {
             print("❌ Error loading video content: \(error)")
             await MainActor.run {
-                viewState = .error(error.localizedDescription)
+                // Only show error if we don't have cached content
+                if case .loading = viewState {
+                    viewState = .error(error.localizedDescription)
+                } else {
+                    print("🎬 Keeping cached content due to error")
+                }
             }
         }
+    }
+    
+    private func shouldRefresh() -> Bool {
+        guard let lastRefresh = lastRefreshTime else {
+            return true // First time loading
+        }
+        
+        let timeSinceRefresh = Date().timeIntervalSince(lastRefresh)
+        return timeSinceRefresh >= refreshInterval
     }
     
     private func isHeroBucket(_ name: String) -> Bool {
@@ -177,14 +204,14 @@ struct InlineHeaderCard: View {
                     Text(category.name)
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundColor(.primary)
+                        .foregroundColor(.white)
                         .lineLimit(2)
                     
                     // Category description (like "The stage is set...") - only if different from name
                     if !category.description.isEmpty && category.description != category.name {
                         Text(category.description)
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.gray)
                             .lineLimit(3)
                     }
                 }
@@ -217,12 +244,12 @@ struct InlineHeaderCard: View {
                 HStack {
                     Text("ESPN")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.gray)
                     
                     if let league = video.league {
                         Text("•")
                             .font(.caption)
-                            .foregroundColor(.secondary.opacity(0.6))
+                            .foregroundColor(.gray.opacity(0.6))
                         Text(league.uppercased())
                             .font(.caption)
                             .fontWeight(.bold)
@@ -232,7 +259,7 @@ struct InlineHeaderCard: View {
                     if let network = video.network {
                         Text("•")
                             .font(.caption)
-                            .foregroundColor(.secondary.opacity(0.6))
+                            .foregroundColor(.gray.opacity(0.6))
                         Text(network)
                             .font(.caption)
                             .fontWeight(.bold)
@@ -244,11 +271,11 @@ struct InlineHeaderCard: View {
                     if !dateText.contains("0s") {
                         Text("•")
                             .font(.caption)
-                            .foregroundColor(.secondary.opacity(0.6))
+                            .foregroundColor(.gray.opacity(0.6))
                         
                         Text(dateText)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.gray)
                     }
                     
                     Spacer()
@@ -257,7 +284,7 @@ struct InlineHeaderCard: View {
                     if let duration = video.duration {
                         Text(formatDuration(duration))
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.gray)
                     }
                 }
             }
@@ -266,6 +293,7 @@ struct InlineHeaderCard: View {
         }
         .liquidGlassCard(cornerRadius: 12, density: .light)
         .padding(.horizontal)
+        .preferredColorScheme(.dark)
     }
     
     private func formatVideoDate(_ date: Date) -> String {
@@ -464,7 +492,7 @@ struct VideoCategorySection: View {
                                             ))
                                             .overlay(
                                                 ProgressView()
-                                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
                                             )
                                     }
                                 } else {

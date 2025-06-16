@@ -33,13 +33,13 @@ struct ESPNToolbar: ToolbarContent {
                 case .roundLogo:
                     Image("E_Round_Logo")
                         .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 40, height: 44, alignment: .center)
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 44, height: 44, alignment: .center)
                 case .standardLogo:
                     Image("ESPN_Logo")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .frame(height: 24)
+                        .frame(width: 36, height: 24)
                         .clipped()
                 }
             }

@@ -174,7 +174,19 @@ struct ESPNPlusView: View {
                 SettingsView(colorScheme: $colorScheme)
                     .preferredColorScheme(colorScheme)
             }
+            .refreshableWithHaptics {
+                await refreshPlusContent()
+            }
         }
+    }
+    
+    private func refreshPlusContent() async {
+        // Simulate network delay
+        try? await Task.sleep(nanoseconds: 1_500_000_000)
+        
+        // In a real app, this would fetch new ESPN+ content
+        // For now, we just simulate the refresh
+        print("Refreshed ESPN+ content")
     }
 }
 

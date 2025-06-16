@@ -133,6 +133,41 @@ This session focused heavily on data parsing, image handling, and UI polish. The
 ✅ **TLS/SSL issues resolved** using existing infrastructure
 ✅ **Video categories displaying** properly from Watch API buckets
 
+## ESPN Logo Sizing Issue Fix (June 16, 2025)
+
+### Problem Description
+ESPN logo in WatchView toolbar was oscillating between two sizes (97×24px and 36×24px) during view state changes when videos loaded, while other tabs maintained consistent sizing.
+
+### Root Cause Analysis
+- **Initial render**: Logo correctly sized to ~97px wide × 24px high
+- **State transitions**: During `loadVideoContent()` execution and `viewState` changes from `.loading` → `.loaded`, SwiftUI was re-rendering the toolbar
+- **Layout constraint conflict**: Original code used `.frame(height: 24)` with dynamic width calculation based on aspect ratio
+- **Animation cycles**: During re-renders, SwiftUI temporarily applied different width constraints causing oscillation
+
+### Debugging Process
+1. **Added debug logging**: Tracked logo size changes with GeometryReader and console output
+2. **Identified timing**: Size changes correlated exactly with video content loading completion
+3. **Isolated issue**: Problem was specific to WatchView due to its unique state management and view hierarchy
+4. **Confirmed pattern**: Logo oscillated between `(97.05, 24.0)` and `(36.0, 24.0)` consistently
+
+### Solution Implementation
+- **Fixed both dimensions**: Changed from `.frame(height: 24)` to `.frame(width: 36, height: 24)` in ESPNToolbar.swift
+- **Prevented oscillation**: Explicit width constraint prevents SwiftUI from recalculating width during view updates
+- **Consistent sizing**: All tabs now display logo at uniform 36×24 pixels
+
+### Files Modified
+- `ESPNToolbar.swift:42`: Changed standard logo frame from height-only to explicit width×height dimensions
+
+### Key Learnings
+- **SwiftUI re-rendering**: View state changes can cause toolbar elements to recalculate layout constraints
+- **Dimension specificity**: For stable UI elements, specify both width and height rather than relying on aspect ratio calculations
+- **Debug methodology**: GeometryReader with onChange callbacks provides precise insight into layout changes
+
+### Current Status
+✅ **ESPN logo displays consistently** across all tabs at 36×24 pixels
+✅ **No size oscillation** during WatchView content loading
+✅ **Toolbar styling maintained** with proper dark mode appearance
+
 ## Component Creation Guidelines
 
 When creating new UI components, follow these patterns:

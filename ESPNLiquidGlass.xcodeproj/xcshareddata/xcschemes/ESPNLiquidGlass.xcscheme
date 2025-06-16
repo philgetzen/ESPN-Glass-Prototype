@@ -25,7 +25,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "581FA126ED5933C27A8D22F3"
-               BuildableName = "ESPNLiquidGlass.app"
+               BuildableName = "ESPN.app"
                BlueprintName = "ESPNLiquidGlass"
                ReferencedContainer = "container:ESPNLiquidGlass.xcodeproj">
             </BuildableReference>
@@ -54,7 +54,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "581FA126ED5933C27A8D22F3"
-            BuildableName = "ESPNLiquidGlass.app"
+            BuildableName = "ESPN.app"
             BlueprintName = "ESPNLiquidGlass"
             ReferencedContainer = "container:ESPNLiquidGlass.xcodeproj">
          </BuildableReference>
@@ -70,7 +70,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "581FA126ED5933C27A8D22F3"
-            BuildableName = "ESPNLiquidGlass.app"
+            BuildableName = "ESPN.app"
             BlueprintName = "ESPNLiquidGlass"
             ReferencedContainer = "container:ESPNLiquidGlass.xcodeproj">
          </BuildableReference>

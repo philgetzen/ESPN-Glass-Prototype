@@ -8,31 +8,28 @@ struct ContentView: View {
     var body: some View {
         TabView(selection: $selectedTab) {
 
-            HomeView(colorScheme: $colorScheme)
-                .tabItem { Label("Home", systemImage: "house") }
-                .tag(0)
+                HomeView(colorScheme: $colorScheme)
+                    .tabItem { Label("Home", systemImage: "house") }
+                    .tag(0)
 
-            ScoresView(colorScheme: $colorScheme)
-                .tabItem { Label("Scores", systemImage: "sportscourt") }
-                .tag(1)
+                ScoresView(colorScheme: $colorScheme)
+                    .tabItem { Label("Scores", systemImage: "sportscourt") }
+                    .tag(1)
 
-            WatchView(colorScheme: $colorScheme)
-                .tabItem { Label("Watch", systemImage: "play.rectangle") }
-                .tag(2)
+                WatchView(colorScheme: $colorScheme)
+                    .tabItem { Label("Watch", systemImage: "play.rectangle") }
+                    .tag(2)
 
-            ESPNPlusView(colorScheme: $colorScheme)
-                .tabItem { Label("ESPN+", systemImage: "plus.rectangle") }
-                .tag(3)
+                ESPNPlusView(colorScheme: $colorScheme)
+                    .tabItem { Label("ESPN+", systemImage: "plus.rectangle") }
+                    .tag(3)
 
-            MoreView(colorScheme: $colorScheme)
-                .tabItem { Label("More", systemImage: "ellipsis") }
-                .tag(4)
+                MoreView(colorScheme: $colorScheme)
+                    .tabItem { Label("More", systemImage: "ellipsis") }
+                    .tag(4)
         }
         .preferredColorScheme(colorScheme)
         .onAppear {
-            configureTabBarAppearance()
-        }
-        .onChange(of: colorScheme) { _, newScheme in
             configureTabBarAppearance()
         }
     }
@@ -41,15 +38,14 @@ struct ContentView: View {
         let appearance = UITabBarAppearance()
         appearance.configureWithDefaultBackground()
         
-        // Set background based on current color scheme
-        if colorScheme == .dark {
-            appearance.backgroundColor = UIColor.systemBackground.withAlphaComponent(0.8)
-        } else {
-            appearance.backgroundColor = UIColor.systemBackground.withAlphaComponent(0.8)
-        }
+        // Always use the app's color scheme, not the individual view's
+        let effectiveColorScheme = colorScheme ?? .light
         
-        // Configure blur effect
-        appearance.backgroundEffect = UIBlurEffect(style: colorScheme == .dark ? .systemMaterialDark : .systemMaterialLight)
+        // Set background based on app color scheme
+        appearance.backgroundColor = UIColor.systemBackground.withAlphaComponent(0.8)
+        
+        // Configure blur effect based on app color scheme
+        appearance.backgroundEffect = UIBlurEffect(style: effectiveColorScheme == .dark ? .systemMaterialDark : .systemMaterialLight)
         
         // Configure selected item color (ESPN red)
         let espnRed = UIColor(red: 0.89, green: 0.094, blue: 0.216, alpha: 1.0) // #E31837

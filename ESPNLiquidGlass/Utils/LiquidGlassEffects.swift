@@ -398,3 +398,24 @@ extension Animation {
         .easeInOut(duration: duration)
     }
 }
+
+// MARK: - Refreshable with Haptics
+extension View {
+    /// Adds pull-to-refresh functionality with haptic feedback
+    func refreshableWithHaptics(action: @escaping () async -> Void) -> some View {
+        self.refreshable {
+            // Haptic feedback when refresh starts
+            let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+            impactFeedback.prepare()
+            impactFeedback.impactOccurred()
+            
+            // Perform the refresh action
+            await action()
+            
+            // Haptic feedback when refresh completes
+            let successFeedback = UINotificationFeedbackGenerator()
+            successFeedback.prepare()
+            successFeedback.notificationOccurred(.success)
+        }
+    }
+}

@@ -40,19 +40,6 @@ struct ArticleCard: View {
             }
             .aspectRatio(16/9, contentMode: .fit)
             .liquidGlassBackground(density: .light, flowDirection: .natural)
-            .overlay(alignment: .center) {
-                if article.type == .video {
-                    Image(systemName: "play.circle.fill")
-                        .font(.system(size: 60))
-                        .foregroundColor(.white)
-                        .glowEffect(
-                            color: .white,
-                            radius: 10,
-                            intensity: .medium,
-                            pulsation: .gentle
-                        )
-                }
-            }
             .onTapGesture {
                 if article.type == .video && article.videoURL != nil {
                     onVideoTap()

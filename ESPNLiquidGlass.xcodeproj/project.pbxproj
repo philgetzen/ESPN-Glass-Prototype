@@ -25,6 +25,7 @@
 		8B4EC32E2DFA6C0000A0F0FD /* ESPNAPIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4EC32F2DFA6C0000A0F0FD /* ESPNAPIModels.swift */; };
 		8B4EC3302DFA6C0100A0F0FD /* ESPNAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4EC3312DFA6C0100A0F0FD /* ESPNAPIService.swift */; };
 		8B4EC3332DFA6D0000A0F0FD /* VideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4EC3342DFA6D0000A0F0FD /* VideoPlayerView.swift */; };
+		8BD003CD2DFE920200E75FAD /* ESPNWatchAPIParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD003CC2DFE920200E75FAD /* ESPNWatchAPIParser.swift */; };
 		97A6DD0F499A5EAFEFC3A037 /* MoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59FA27E5C8EB0662F63B4B20 /* MoreView.swift */; };
 		9B9D378DF72B0B039CAA04A0 /* ScoresView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB9650F17DB9016F4EEF37BD /* ScoresView.swift */; };
 		9C39DF3111BA9CD51451DD73 /* LiquidGlassEffects.swift in Sources */ = {isa = PBXBuildFile; fileRef = C08CCE6AAC952D4BAF444B4D /* LiquidGlassEffects.swift */; };
@@ -52,6 +53,7 @@
 		8B4EC32F2DFA6C0000A0F0FD /* ESPNAPIModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ESPNAPIModels.swift; sourceTree = "<group>"; };
 		8B4EC3312DFA6C0100A0F0FD /* ESPNAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ESPNAPIService.swift; sourceTree = "<group>"; };
 		8B4EC3342DFA6D0000A0F0FD /* VideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerView.swift; sourceTree = "<group>"; };
+		8BD003CC2DFE920200E75FAD /* ESPNWatchAPIParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ESPNWatchAPIParser.swift; sourceTree = "<group>"; };
 		9A5A71C2D41226D0ECBB7B96 /* ESPNLiquidGlassApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ESPNLiquidGlassApp.swift; sourceTree = "<group>"; };
 		AB9650F17DB9016F4EEF37BD /* ScoresView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoresView.swift; sourceTree = "<group>"; };
 		C08CCE6AAC952D4BAF444B4D /* LiquidGlassEffects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidGlassEffects.swift; sourceTree = "<group>"; };
@@ -105,6 +107,7 @@
 		8B4EC3322DFA6C0200A0F0FD /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				8BD003CC2DFE920200E75FAD /* ESPNWatchAPIParser.swift */,
 				8B4EC3312DFA6C0100A0F0FD /* ESPNAPIService.swift */,
 			);
 			path = Services;
@@ -186,11 +189,6 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 2600;
-				TargetAttributes = {
-					581FA126ED5933C27A8D22F3 = {
-						DevelopmentTeam = "";
-					};
-				};
 			};
 			buildConfigurationList = 4A31BCC1F2FBE10DDF213C3A /* Build configuration list for PBXProject "ESPNLiquidGlass" */;
 			compatibilityVersion = "Xcode 14.0";
@@ -242,6 +240,7 @@
 				188BDA23F897ECCE41B17152 /* Sport.swift in Sources */,
 				1AFD54C73D97E8004BAB2AB7 /* Team.swift in Sources */,
 				79F93FDF906B067BD88F6E73 /* WatchView.swift in Sources */,
+				8BD003CD2DFE920200E75FAD /* ESPNWatchAPIParser.swift in Sources */,
 				8B4EC32E2DFA6C0000A0F0FD /* ESPNAPIModels.swift in Sources */,
 				8B4EC3302DFA6C0100A0F0FD /* ESPNAPIService.swift in Sources */,
 				8B4EC3332DFA6D0000A0F0FD /* VideoPlayerView.swift in Sources */,
@@ -257,6 +256,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 6SJ6VN4HX6;
 				INFOPLIST_FILE = ESPNLiquidGlass/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -336,6 +336,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 6SJ6VN4HX6;
 				INFOPLIST_FILE = ESPNLiquidGlass/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (

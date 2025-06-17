@@ -69,27 +69,6 @@ final class ESPNAPIService: Sendable {
         do {
             let (data, _) = try await session.data(for: request)
             
-            // Debug: Check for video content in response
-            if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-               let headlines = json["headlines"] as? [[String: Any]] {
-                let videoCount = headlines.filter { headline in
-                    if let video = headline["video"] as? [Any] {
-                        return !video.isEmpty
-                    }
-                    return false
-                }.count
-                print("📹 Found \(videoCount) articles with video content out of \(headlines.count) total")
-                
-                // Check first few articles for video structure
-                for (index, headline) in headlines.prefix(5).enumerated() {
-                    if let video = headline["video"] as? [[String: Any]], !video.isEmpty {
-                        print("📹 Article \(index) has \(video.count) videos")
-                        if let firstVideo = video.first {
-                            print("📹 Video keys: \(Array(firstVideo.keys))")
-                        }
-                    }
-                }
-            }
             
             let newsResponse = try decoder.decode(NewsResponse.self, from: data)
             return newsResponse.headlines ?? []
@@ -217,7 +196,6 @@ final class ESPNAPIService: Sendable {
     // MARK: - Video Content Methods
     
     func fetchVideoContent() async throws -> [VideoCategory] {
-        print("🎬 Fetching video content from ESPN Watch API...")
         
         let watchAPIURL = "https://watch.product.api.espn.com/api/product/v3/watchespn/web/home?lang=en&features=continueWatching,flagship,pbov7,high-volume-row,watch-web-redesign,imageRatio58x13,promoTiles,openAuthz,video-header,explore-row,button-service,inline-header&headerBgImageWidth=1280&countryCode=US&tz=UTC-0400"
         
@@ -228,18 +206,23 @@ final class ESPNAPIService: Sendable {
         do {
             let (data, _) = try await session.data(from: url)
             
-            // Parse the Watch API response using our parser
-            guard let response = ESPNWatchAPIParser.parseResponse(from: data) else {
+            // Parse the Watch API response on a background queue to avoid blocking main thread
+            let response = await withCheckedContinuation { continuation in
+                Task.detached(priority: .userInitiated) {
+                    let result = ESPNWatchAPIParser.parseResponse(from: data)
+                    continuation.resume(returning: result)
+                }
+            }
+            
+            guard let response = response else {
                 throw APIError.invalidResponse
             }
             
             guard let page = response.page,
                   let buckets = page.buckets else {
-                print("❌ No buckets found in Watch API response")
                 return []
             }
             
-            print("🎬 Found \(buckets.count) buckets in Watch API response")
             
             // Convert buckets to video categories
             var categories: [VideoCategory] = []
@@ -248,11 +231,10 @@ final class ESPNAPIService: Sendable {
                 guard let bucketName = bucket.name,
                       let contents = bucket.contents,
                       !contents.isEmpty else {
-                    print("⏭️ Skipping empty bucket at index \(bucketIndex)")
                     continue
                 }
                 
-                // Convert content items to video items
+                // Convert content items to video items (optimized sequential processing)
                 let videos = contents.compactMap { content in
                     ESPNWatchAPIParser.convertToVideoItem(content)
                 }
@@ -268,16 +250,35 @@ final class ESPNAPIService: Sendable {
                         showTitle: !(bucket.tags?.contains("inline-header") == true)
                     )
                     categories.append(category)
-                    print("✅ Created category '\(bucketName)' with \(videos.count) videos (bucket index: \(bucketIndex))")
                 }
             }
             
-            print("🎬 Created \(categories.count) video categories from ESPN Watch API")
             return categories
             
         } catch {
-            print("❌ Failed to fetch video content from Watch API: \(error)")
             throw error
         }
+    }
+    
+    // MARK: - Playback URL Resolution
+    
+    func resolvePlaybackURL(from apiURL: String) async throws -> String {
+        guard let url = URL(string: apiURL) else {
+            throw APIError.invalidURL
+        }
+        
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 10.0 // 10 second timeout
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        
+        let (data, _) = try await session.data(for: request)
+        
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let playbackState = json["playbackState"] as? [String: Any],
+              let videoHref = playbackState["videoHref"] as? String else {
+            throw APIError.invalidResponse
+        }
+        
+        return videoHref
     }
 }

@@ -133,6 +133,64 @@ This session focused heavily on data parsing, image handling, and UI polish. The
 ✅ **TLS/SSL issues resolved** using existing infrastructure
 ✅ **Video categories displaying** properly from Watch API buckets
 
+## ESPN Watch Video Playback Implementation (June 17, 2025)
+
+### Implementation Overview
+Implemented proper video URL handling for ESPN Watch content based on authentication requirements (authType). Videos requiring authentication through ESPN providers redirect to the ESPN app, while unrestricted content attempts direct playback.
+
+### Technical Implementation
+
+#### 1. API Model Updates
+- **ESPNWatchContent**: Added `authType: [String]?` field and full `streams: [ESPNWatchStream]?` structure
+- **ESPNWatchStream**: New model capturing stream authentication and links:
+  ```swift
+  struct ESPNWatchStream {
+      let authType: [String]?
+      let links: ESPNWatchStreamLinks?
+      let source: String?
+      let network: String?
+  }
+  ```
+- **ESPNWatchStreamLinks**: Contains playback URLs including `appPlay`, `web`, and `mobile`
+
+#### 2. VideoItem Model Enhancements
+- Added `authType: [String]?` - authentication types required for video
+- Added `streamingURL: String?` - direct streaming URL from appPlay link
+- Added `contentId: String?` - ESPN content ID for deep linking
+- Added computed property `requiresESPNApp` that checks for restricted authTypes: `["MVPD", "Direct", "Flagship", "ISP"]`
+
+#### 3. Playback Logic (WatchView.swift:173-218)
+- **Empty authType []**: Attempts playback with streamingURL if available
+- **Restricted authType**: Shows one-time alert, then redirects to ESPN app using deep link
+- **No URL available**: Shows error alert with debug information
+- **ESPN App Deep Link Format**: `sportscenter://x-callback-url/showVideo?videoID={contentId}`
+- **Fallback**: Opens App Store if ESPN app not installed
+
+#### 4. Configuration Updates
+- Added `LSApplicationQueriesSchemes` to Info.plist with `sportscenter` scheme
+- Enables app to check if ESPN app is installed before attempting deep link
+
+### User Experience Flow
+1. **First restricted content tap**: Shows alert explaining ESPN app requirement
+2. **Subsequent taps**: Directly opens ESPN app without alert
+3. **Playable content**: Opens in-app video player
+4. **Missing data**: Shows error with debug info (contentId, authType)
+
+### Key Files Modified
+- `ESPNWatchAPIParser.swift`: Stream parsing logic (lines 279-311, 477-526)
+- `ESPNAPIModels.swift`: VideoItem model updates (lines 430-438)
+- `WatchView.swift`: Video tap handling and deep linking (lines 173-218)
+- `Info.plist`: ESPN app URL scheme registration (lines 60-63)
+
+### Debug Output
+Parser logs authentication and streaming info for each video:
+```
+🎬 Video: {title}
+   - Content ID: {id}
+   - AuthType: {authType array}
+   - Streaming URL: {appPlay URL or "none"}
+```
+
 ## ESPN Logo Sizing Issue Fix (June 16, 2025)
 
 ### Problem Description

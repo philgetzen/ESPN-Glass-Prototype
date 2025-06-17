@@ -113,18 +113,33 @@ struct ESPNWatchContent {
     
     // Additional metadata
     let showKey: String?
-    let streams: [String]?
+    let streams: [ESPNWatchStream]?
     let keywords: [String]?
     let pillMetadata: [String: Any]?
     let tracking: [String: Any]?
     let tags: [String]?
     let autoplay: Bool?
+    let authType: [String]?
 }
 
 struct ESPNWatchLink {
     let url: String?
     let type: String?
     let rel: String?
+}
+
+struct ESPNWatchStream {
+    let authType: [String]?
+    let links: ESPNWatchStreamLinks?
+    let source: String?
+    let network: String?
+}
+
+struct ESPNWatchStreamLinks {
+    let appPlay: String?
+    let web: String?
+    let mobile: String?
+    let play: String?
 }
 
 // MARK: - Parser Class
@@ -140,11 +155,9 @@ final class ESPNWatchAPIParser {
     private static func parseManually(from data: Data) -> ESPNWatchAPIResponse? {
         do {
             guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-                print("❌ Could not parse JSON response")
                 return nil
             }
             
-            print("📊 ESPN Watch API response keys: \(Array(json.keys))")
             
             var buckets: [ESPNWatchBucket] = []
             
@@ -152,18 +165,14 @@ final class ESPNWatchAPIParser {
             if let page = json["page"] as? [String: Any],
                let bucketsArray = page["buckets"] as? [[String: Any]] {
                 
-                print("🪣 Found \(bucketsArray.count) buckets in page object")
                 
                 for (index, bucketData) in bucketsArray.enumerated() {
                     let bucketName = bucketData["name"] as? String ?? "Bucket \(index)"
                     let bucketTags = bucketData["tags"] as? [String]
-                    print("🪣 Processing bucket: '\(bucketName)' with tags: \(bucketTags ?? [])")
                     
                     var contents: [ESPNWatchContent] = []
                     
                     if let contentsArray = bucketData["contents"] as? [[String: Any]] {
-                        print("📦 Found \(contentsArray.count) items in bucket '\(bucketName)'")
-                        
                         for contentData in contentsArray {
                             if let content = parseContent(from: contentData, bucketTags: bucketTags, bucketData: bucketData) {
                                 contents.append(content)
@@ -172,7 +181,6 @@ final class ESPNWatchAPIParser {
                     }
                     
                     buckets.append(ESPNWatchBucket(name: bucketName, contents: contents, tags: bucketTags))
-                    print("✅ Parsed bucket '\(bucketName)' with \(contents.count) items")
                 }
             }
             
@@ -180,7 +188,6 @@ final class ESPNWatchAPIParser {
             return ESPNWatchAPIResponse(page: page)
             
         } catch {
-            print("❌ Manual parsing failed: \(error)")
             return nil
         }
     }
@@ -207,8 +214,7 @@ final class ESPNWatchAPIParser {
             if let bucketBackgroundImage = bucketData["backgroundImage"] as? [String: Any],
                let href = bucketBackgroundImage["href"] as? String {
                 backgroundImageHref = href
-                print("🖼️ Found bucket-level backgroundImage for inline-header: \(href)")
-            }
+                }
         }
         
         // Fallback to content-level backgroundImage
@@ -261,31 +267,45 @@ final class ESPNWatchAPIParser {
         
         let progress = data["progress"] as? Double
         let showKey = data["showKey"] as? String
-        let streams = data["streams"] as? [String]
+        
+        // Parse streams array with full structure
+        var parsedStreams: [ESPNWatchStream]? = nil
+        if let streamsArray = data["streams"] as? [[String: Any]] {
+            parsedStreams = streamsArray.compactMap { streamData in
+                let authType = streamData["authTypes"] as? [String]
+                let source = streamData["source"] as? String
+                let network = streamData["network"] as? String
+                
+                // Parse links object
+                var streamLinks: ESPNWatchStreamLinks? = nil
+                if let linksData = streamData["links"] as? [String: Any] {
+                    streamLinks = ESPNWatchStreamLinks(
+                        appPlay: linksData["appPlay"] as? String,
+                        web: linksData["web"] as? String,
+                        mobile: linksData["mobile"] as? String,
+                        play: linksData["play"] as? String
+                    )
+                }
+                
+                return ESPNWatchStream(
+                    authType: authType,
+                    links: streamLinks,
+                    source: source,
+                    network: network
+                )
+            }
+        }
+        
         let keywords = data["keywords"] as? [String]
         let pillMetadata = data["pillMetadata"] as? [String: Any]
         let tracking = data["tracking"] as? [String: Any]
         let contentTags = data["tags"] as? [String] ?? []
         let autoplay = data["autoplay"] as? Bool
+        let authType = data["authType"] as? [String]
         
         // Merge bucket tags with content tags
         let allTags = contentTags + (bucketTags ?? [])
         
-        // Essential logging for inline-header buckets only
-        if bucketTags?.contains("inline-header") == true {
-            print("🏷️ INLINE-HEADER BUCKET: '\(title ?? name ?? "unknown")' - Type: \(data["type"] ?? "nil")")
-            print("🏷️   RAW DATA DUMP:")
-            for key in Array(data.keys).sorted() {
-                let value = data[key]
-                if let dict = value as? [String: Any] {
-                    print("🏷️     \(key): [DICT] \(dict)")
-                } else if let array = value as? [Any] {
-                    print("🏷️     \(key): [ARRAY] \(array)")
-                } else {
-                    print("🏷️     \(key): \(value ?? "nil")")
-                }
-            }
-        }
         
         // Create content object with all properties
         return ESPNWatchContent(
@@ -331,12 +351,13 @@ final class ESPNWatchAPIParser {
             includeSponsor: includeSponsor,
             progress: progress,
             showKey: showKey,
-            streams: streams,
+            streams: parsedStreams,
             keywords: keywords,
             pillMetadata: pillMetadata,
             tracking: tracking,
             tags: allTags,
-            autoplay: autoplay
+            autoplay: autoplay,
+            authType: authType
         )
     }
     
@@ -345,7 +366,6 @@ final class ESPNWatchAPIParser {
         // Determine title
         let title = content.title ?? content.name ?? content.headline ?? content.shortName
         guard let finalTitle = title, !finalTitle.isEmpty else {
-            print("❌ No title found for content: \(content.id ?? "unknown")")
             return nil
         }
         
@@ -356,8 +376,6 @@ final class ESPNWatchAPIParser {
         if content.type?.lowercased() == "inlineheader" {
             // For inline-header content, prioritize background image
             thumbnailURL = content.backgroundImageHref ?? content.imageHref ?? content.iconHref ?? content.imageIcon
-            print("🖼️ Inline-header content detected (type: \(content.type ?? "nil"))")
-            print("🖼️ Using background image priority for inline-header")
         } else {
             // For regular content, use standard priority
             thumbnailURL = content.imageHref ?? content.backgroundImageHref ?? content.iconHref
@@ -365,38 +383,16 @@ final class ESPNWatchAPIParser {
         
         // For inline-header content, try to request appropriate 58:13 aspect ratio images
         if let imageURL = thumbnailURL, content.type?.lowercased() == "inlineheader" {
-            // For inline-header content, request 58:13 aspect ratio (approximately 4.46:1)
+            // For inline-header content, request 58:13 aspect ratio (simple string append for performance)
             if imageURL.contains("espncdn.com") {
-                var urlComponents = URLComponents(string: imageURL)
-                var queryItems = urlComponents?.queryItems ?? []
-                
-                // Remove existing sizing params
-                queryItems.removeAll { item in
-                    ["w", "width", "h", "height", "f", "crop"].contains(item.name.lowercased())
-                }
-                
-                // Add 58:13 aspect ratio sizing (e.g., 580x130 for good quality)
-                queryItems.append(URLQueryItem(name: "w", value: "580"))
-                queryItems.append(URLQueryItem(name: "h", value: "130"))
-                queryItems.append(URLQueryItem(name: "f", value: "jpg"))
-                queryItems.append(URLQueryItem(name: "crop", value: "1"))
-                
-                urlComponents?.queryItems = queryItems
-                thumbnailURL = urlComponents?.url?.absoluteString ?? imageURL
-                print("🖼️ Modified inline-header image URL for 58:13 ratio: \(thumbnailURL ?? "nil")")
+                // Simple URL manipulation without URLComponents parsing
+                let separator = imageURL.contains("?") ? "&" : "?"
+                thumbnailURL = "\(imageURL)\(separator)w=580&h=130&f=jpg&crop=1"
             }
         }
         
         // Essential logging for inline-header content only
         if content.type?.lowercased() == "inlineheader" {
-            print("🖼️ INLINE-HEADER: \(content.title ?? content.name ?? "unknown")")
-            print("🖼️   Type: \(content.type ?? "nil")")
-            print("🖼️   imageHref: \(content.imageHref ?? "nil")")
-            print("🖼️   backgroundImageHref: \(content.backgroundImageHref ?? "nil")")
-            print("🖼️   iconHref: \(content.iconHref ?? "nil")")
-            print("🖼️   imageIcon: \(content.imageIcon ?? "nil")")
-            print("🖼️   imageFormat: \(content.imageFormat ?? "nil")")
-            print("🖼️   Final thumbnailURL: \(thumbnailURL ?? "nil")")
         }
         
         // Build description
@@ -431,11 +427,74 @@ final class ESPNWatchAPIParser {
         // Merge content tags with default tags
         let allTags = (content.tags ?? []) + ["espn", "watch"] + (content.isLive == true ? ["live"] : [])
         
+        // Extract streaming URL and authType from streams
+        var streamingURL: String? = nil
+        var authType: [String]? = content.authType // First check content-level authType
+        
+        if let streams = content.streams, !streams.isEmpty {
+            // For content with multiple streams, we need to find the most restrictive authType
+            // and determine if any stream is available for direct playback
+            var mostRestrictiveAuthType: [String] = []
+            
+            for stream in streams {
+                let streamAuthType = stream.authType ?? []
+                
+                // Track the most restrictive authType across all streams
+                let restrictedTypes = ["mvpd", "direct", "flagship", "isp"]
+                let hasRestrictedAuth = streamAuthType.contains(where: restrictedTypes.contains)
+                
+                if hasRestrictedAuth && mostRestrictiveAuthType.isEmpty {
+                    mostRestrictiveAuthType = streamAuthType
+                }
+                
+                // For event-based content, all streams typically require authentication
+                // Use the first stream's authType as representative
+                if authType == nil {
+                    authType = streamAuthType
+                }
+            }
+            
+            // Use the most restrictive authType found, or the content-level one
+            if !mostRestrictiveAuthType.isEmpty {
+                authType = mostRestrictiveAuthType
+            }
+            
+            // For content with empty or no authType, try to find a playable stream URL
+            if authType?.isEmpty ?? true {
+                for stream in streams {
+                    let streamAuthType = stream.authType ?? []
+                    
+                    if streamAuthType.isEmpty {
+                        // For unrestricted clips/videos, try play API first (more likely to be direct stream), then web
+                        if let playURL = stream.links?.play, !playURL.isEmpty {
+                            streamingURL = playURL
+                            break
+                        } else if let webURL = stream.links?.web, !webURL.isEmpty {
+                            streamingURL = webURL
+                            break
+                        } else if let appPlayURL = stream.links?.appPlay, !appPlayURL.isEmpty {
+                            streamingURL = appPlayURL
+                            break
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Determine the appropriate content ID for deep linking
+        let contentId: String?
+        if content.isEvent == true, let eventId = content.eventId {
+            contentId = eventId
+        } else {
+            contentId = content.id
+        }
+        
+        
         return VideoItem(
             title: finalTitle,
             description: description,
             thumbnailURL: thumbnailURL,
-            videoURL: nil, // ESPN doesn't expose direct URLs
+            videoURL: nil, // Keep as nil, use streamingURL instead
             duration: content.duration,
             publishedDate: publishDate,
             sport: sport,
@@ -450,7 +509,12 @@ final class ESPNWatchAPIParser {
             network: network,
             reAir: reAir,
             eventName: eventName,
-            ratio: content.ratio
+            ratio: content.ratio,
+            authType: authType,
+            streamingURL: streamingURL,
+            contentId: contentId,
+            isEvent: content.isEvent,
+            appPlayURL: extractAppPlayURL(from: content)
         )
     }
     
@@ -531,7 +595,10 @@ final class ESPNWatchAPIParser {
     private static func extractNetworkFromContent(_ content: ESPNWatchContent) -> String? {
         // Try streams array first (likely contains network info)
         if let streams = content.streams, !streams.isEmpty {
-            return streams.first
+            // Get network from first stream
+            if let network = streams.first?.network {
+                return network
+            }
         }
         
         // Parse formatted subtitle
@@ -609,6 +676,20 @@ final class ESPNWatchAPIParser {
         }
         
         // If all potential event names are the same as title, don't show event name
+        return nil
+    }
+    
+    /// Extract the ESPN app deep link URL from content streams
+    private static func extractAppPlayURL(from content: ESPNWatchContent) -> String? {
+        // Try to get appPlay URL from streams
+        if let streams = content.streams, !streams.isEmpty {
+            // For multiple streams, prefer the primary or first available appPlay URL
+            for stream in streams {
+                if let appPlayURL = stream.links?.appPlay, !appPlayURL.isEmpty {
+                    return appPlayURL
+                }
+            }
+        }
         return nil
     }
 }

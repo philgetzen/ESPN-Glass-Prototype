@@ -6,6 +6,12 @@ struct WatchView: View {
     @State private var showSettings = false
     @State private var isRefreshing = false
     @State private var lastRefreshTime: Date?
+    @State private var showESPNAppAlert = false
+    @State private var showPlaybackErrorAlert = false
+    @State private var playbackErrorMessage = ""
+    @State private var hasShownESPNAppAlertThisSession = false
+    @State private var espnAppVideoItem: VideoItem?
+    @State private var isResolvingPlaybackURL = false
     @Binding var colorScheme: ColorScheme?
     
     private let apiService = ESPNAPIService.shared
@@ -28,9 +34,7 @@ struct WatchView: View {
                             // Video Categories
                             ForEach(categories) { category in
                                 VideoCategorySection(category: category) { video in
-                                    if video.videoURL != nil {
-                                        selectedVideoItem = video
-                                    }
+                                    handleVideoTap(video)
                                 }
                                 .preferredColorScheme(.dark)
                             }
@@ -72,10 +76,42 @@ struct WatchView: View {
                     .preferredColorScheme(colorScheme)
             }
             .sheet(item: $selectedVideoItem) { video in
-                if let videoURL = video.videoURL, let url = URL(string: videoURL) {
+                if let streamingURL = video.streamingURL, 
+                   !streamingURL.isEmpty,
+                   let url = URL(string: streamingURL) {
                     VideoPlayerView(videoURL: url, article: Article(from: video))
                         .preferredColorScheme(.dark)
+                        .onDisappear {
+                            // Clear selected video when sheet disappears to prevent memory issues
+                            selectedVideoItem = nil
+                        }
+                } else {
+                    // Fallback view if URL is invalid
+                    VStack {
+                        Text("Video Unavailable")
+                            .font(.headline)
+                        Text("This video cannot be played at this time.")
+                            .foregroundColor(.secondary)
+                        Button("Close") {
+                            selectedVideoItem = nil
+                        }
+                        .padding()
+                    }
+                    .preferredColorScheme(.dark)
                 }
+            }
+            .alert("ESPN App Required", isPresented: $showESPNAppAlert) {
+                Button("Open ESPN App") {
+                    openESPNApp(for: espnAppVideoItem)
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("ESPN Watch content is best experienced in the ESPN app. You'll be redirected there for playback.")
+            }
+            .alert("Playback Error", isPresented: $showPlaybackErrorAlert) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Content is not playable at this time.\n\nDebug: \(playbackErrorMessage)")
             }
         }
         .refreshableWithHaptics {
@@ -99,16 +135,13 @@ struct WatchView: View {
         let needsRefresh = force || shouldRefresh()
         
         if !needsRefresh {
-            print("🎬 Using cached video content (last refresh: \(Int(Date().timeIntervalSince(lastRefreshTime ?? Date.distantPast)))s ago)")
             return
         }
         
-        print("🎬 Starting video content fetch... (force: \(force))")
         
         await MainActor.run {
             if case .loaded(_) = viewState {
                 // Keep existing content during refresh
-                print("🎬 Keeping existing content during refresh")
             } else {
                 viewState = .loading
             }
@@ -123,17 +156,14 @@ struct WatchView: View {
                 } else {
                     viewState = .loaded(categories)
                     lastRefreshTime = Date()
-                    print("🎬 Loaded \(categories.count) video categories at \(Date())")
                 }
             }
         } catch {
-            print("❌ Error loading video content: \(error)")
             await MainActor.run {
                 // Only show error if we don't have cached content
                 if case .loading = viewState {
                     viewState = .error(error.localizedDescription)
                 } else {
-                    print("🎬 Keeping cached content due to error")
                 }
             }
         }
@@ -151,6 +181,133 @@ struct WatchView: View {
     private func isHeroBucket(_ name: String) -> Bool {
         // This function is legacy - hero detection is now done via tags in VideoCategorySection
         return false
+    }
+    
+    // MARK: - Video Playback Handling
+    
+    private func handleVideoTap(_ video: VideoItem) {
+        
+        // Check if this video requires ESPN app authentication
+        if video.requiresESPNApp {
+            
+            // Show alert only once per session for authenticated content
+            if !hasShownESPNAppAlertThisSession {
+                espnAppVideoItem = video
+                showESPNAppAlert = true
+                hasShownESPNAppAlertThisSession = true
+            } else {
+                openESPNApp(for: video)
+            }
+        } else {
+            // For clips and unrestricted content, try direct playback
+            
+            if let streamingURL = video.streamingURL, !streamingURL.isEmpty {
+                // Check if this is a play API URL that needs to be resolved
+                if streamingURL.contains("/playback/video/") {
+                    // Prevent multiple simultaneous resolve operations
+                    guard !isResolvingPlaybackURL else {
+                        return
+                    }
+                    
+                    isResolvingPlaybackURL = true
+                    Task {
+                        await resolvePlaybackURL(for: video, apiURL: streamingURL)
+                        await MainActor.run {
+                            isResolvingPlaybackURL = false
+                        }
+                    }
+                } else {
+                    selectedVideoItem = video
+                }
+            } else {
+                // Don't show alert for missing URLs on browse items (categories/leagues/etc)
+                // These are typically navigation items, not playable content
+                if !video.tags.contains("tile-only") {
+                    playbackErrorMessage = "This content is not available for direct playback"
+                    showPlaybackErrorAlert = true
+                }
+            }
+        }
+    }
+    
+    private func openESPNApp(for video: VideoItem?) {
+        guard let video = video else {
+            playbackErrorMessage = "No video available for deep linking"
+            showPlaybackErrorAlert = true
+            return
+        }
+        
+        // Use the actual appPlay URL from ESPN API instead of constructing manually
+        guard let appPlayURLString = video.appPlayURL else {
+            playbackErrorMessage = "No ESPN app deep link URL available"
+            showPlaybackErrorAlert = true
+            return
+        }
+        
+        
+        if let espnURL = URL(string: appPlayURLString) {
+            if UIApplication.shared.canOpenURL(espnURL) {
+                UIApplication.shared.open(espnURL)
+            } else {
+                // ESPN app not installed, try web URL fallback
+                if let webURL = video.streamingURL, let url = URL(string: webURL) {
+                    UIApplication.shared.open(url)
+                } else {
+                    // No web URL available, redirect to App Store
+                    if let appStoreURL = URL(string: "https://apps.apple.com/app/espn-live-sports-scores/id317469184") {
+                        UIApplication.shared.open(appStoreURL)
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Playback URL Resolution
+    
+    private func resolvePlaybackURL(for video: VideoItem, apiURL: String) async {
+        do {
+            
+            // Use ESPNAPIService to resolve the URL with proper timeout and TLS handling
+            let videoHref = try await apiService.resolvePlaybackURL(from: apiURL)
+            
+            // Create resolved video item off the main thread to avoid blocking
+            let resolvedVideo = VideoItem(
+                title: video.title,
+                description: video.description,
+                thumbnailURL: video.thumbnailURL,
+                videoURL: videoHref, // Use the resolved URL
+                duration: video.duration,
+                publishedDate: video.publishedDate,
+                sport: video.sport,
+                league: video.league,
+                isLive: video.isLive,
+                viewCount: video.viewCount,
+                tags: video.tags,
+                autoplay: video.autoplay,
+                showMetadata: video.showMetadata,
+                size: video.size,
+                type: video.type,
+                network: video.network,
+                reAir: video.reAir,
+                eventName: video.eventName,
+                ratio: video.ratio,
+                authType: video.authType,
+                streamingURL: videoHref, // Also update streamingURL for consistency
+                contentId: video.contentId,
+                isEvent: video.isEvent,
+                appPlayURL: video.appPlayURL
+            )
+            
+            await MainActor.run {
+                selectedVideoItem = resolvedVideo
+            }
+            
+        } catch {
+            await MainActor.run {
+                playbackErrorMessage = "Failed to resolve video stream: \(error.localizedDescription)"
+                showPlaybackErrorAlert = true
+            }
+        }
     }
 }
 
@@ -610,10 +767,6 @@ struct VideoCategorySection: View {
     private var hasInlineHeaderTag: Bool {
         let hasTag = category.tags.contains("inline-header")
         if hasTag {
-            print("🎭 INLINE-HEADER CATEGORY DETECTED: '\(category.name)' with \(category.videos.count) videos")
-            for (index, video) in category.videos.enumerated() {
-                print("🎭 Video \(index): '\(video.title)' - thumbnailURL: \(video.thumbnailURL != nil ? "✅" : "❌")")
-            }
         }
         return hasTag
     }
@@ -687,46 +840,34 @@ struct VideoCategorySection: View {
     
     @ViewBuilder
     private func videoCardForContent(video: VideoItem, onTap: @escaping () -> Void) -> some View {
-        // Check for poster/movie content first (2:3)
-        if shouldUsePosterLayout(for: video) {
-            PosterVideoCard(video: video, onTap: onTap)
-        // Check for shows content (4:3)
-        } else if shouldUseShowLayout(for: video) {
-            ShowVideoCard(video: video, onTap: onTap)
-        } else if video.tags.contains("rowCap") || shouldUseSquareForFirstItem(video) {
-            SquareThumbnailCard(video: video, onTap: onTap)
-        } else if shouldUseCircleLayout(for: video) {
-            CircleThumbnailCard(video: video, onTap: onTap)
-        } else if shouldUseSquareLayout(for: video) {
+        // Special case: rowCap tag or first item in breakout row
+        if video.tags.contains("rowCap") || shouldUseSquareForFirstItem(video) {
             SquareThumbnailCard(video: video, onTap: onTap)
         } else {
-            // Use size-based rendering as fallback
-            videoCardForSize(video: video, onTap: onTap)
+            // Category-specific overrides
+            let categoryName = category.name.lowercased()
+            
+            // Use cached layout type from VideoItem
+            switch video.layoutType {
+            case .poster where !categoryName.contains("shows"):
+                PosterVideoCard(video: video, onTap: onTap)
+            case .show, .poster:  // .poster with "shows" falls through to show layout
+                ShowVideoCard(video: video, onTap: onTap)
+            case .circle where isLeagueSportOrConference(category.name):
+                CircleThumbnailCard(video: video, onTap: onTap)
+            case .square where isNetwork(category.name):
+                SquareThumbnailCard(video: video, onTap: onTap)
+            case .large:
+                LargeVideoCard(video: video, onTap: onTap)
+            case .small:
+                SmallVideoCard(video: video, onTap: onTap)
+            default:
+                MediumVideoCard(video: video, onTap: onTap)
+            }
         }
     }
     
-    private func shouldUsePosterLayout(for video: VideoItem) -> Bool {
-        // Check if content has 2:3 ratio (movie poster) or is movie/film type
-        // Exclude categories that contain "shows" even if they also contain "originals"
-        let categoryName = category.name.lowercased()
-        let isShowCategory = categoryName.contains("shows")
-        
-        return !isShowCategory && (
-            video.ratio == "2:3" || 
-            video.type?.lowercased().contains("movie") == true ||
-            video.type?.lowercased().contains("film") == true ||
-            categoryName.contains("films") ||
-            categoryName.contains("spotlight") ||
-            categoryName.contains("originals")
-        )
-    }
     
-    private func shouldUseShowLayout(for video: VideoItem) -> Bool {
-        // Check if content has 4:3 ratio or is show type
-        return video.ratio == "4:3" ||
-               video.type?.lowercased() == "show" ||
-               category.name.lowercased().contains("shows")
-    }
     
     private func shouldUseSquareForFirstItem(_ video: VideoItem) -> Bool {
         // Only use square layout for first item if it's a true BREAKOUT_ROW_LEAGUES category
@@ -734,35 +875,8 @@ struct VideoCategorySection: View {
         return hasBreakoutRowTag && video == sortedVideos().first
     }
     
-    private func shouldUseCircleLayout(for video: VideoItem) -> Bool {
-        // Circle layout for leagues, sports, conferences, or specific types
-        return isLeagueSportOrConference(category.name) || 
-               video.type?.lowercased() == "league" ||
-               video.type?.lowercased() == "sport" ||
-               video.type?.lowercased() == "conference"
-    }
     
-    private func shouldUseSquareLayout(for video: VideoItem) -> Bool {
-        // Square layout for networks, channels, or specific types
-        return isNetwork(category.name) ||
-               video.type?.lowercased() == "network" ||
-               video.type?.lowercased() == "channel" ||
-               video.tags.contains("square")
-    }
     
-    @ViewBuilder
-    private func videoCardForSize(video: VideoItem, onTap: @escaping () -> Void) -> some View {
-        switch video.size?.lowercased() {
-        case "lg", "large":
-            LargeVideoCard(video: video, onTap: onTap)
-        case "sm", "small":
-            SmallVideoCard(video: video, onTap: onTap)
-        case "md", "medium", nil: // Default to medium if not specified
-            MediumVideoCard(video: video, onTap: onTap)
-        default:
-            MediumVideoCard(video: video, onTap: onTap) // Fallback for unknown sizes
-        }
-    }
     
     
     private func sortedVideos() -> [VideoItem] {
@@ -851,7 +965,7 @@ struct LargeVideoCard: View {
                         VStack(alignment: .leading, spacing: 2) {
                             // Display metadata with proper wrapping
                             if hasVideoMetadata(video) {
-                                Text(buildMetadataText(for: video))
+                                Text(video.metadataText)
                                     .font(.system(size: 11))
                                     .foregroundColor(.gray)
                                     .lineLimit(nil)
@@ -884,31 +998,6 @@ struct LargeVideoCard: View {
         return video.network != nil || video.reAir != nil || video.eventName != nil
     }
     
-    private func buildMetadataText(for video: VideoItem) -> String {
-        var components: [String] = []
-        
-        // Add network if available and not generic
-        if let network = video.network, !network.isEmpty {
-            components.append(network)
-        }
-        
-        // Add league/sport info if available and different from network
-        if let league = video.league, !league.isEmpty, league != "ESPN" {
-            // Don't duplicate if league is same as network
-            if video.network != league {
-                components.append(league)
-            }
-        }
-        
-        // Add re-air info if applicable
-        if let reAir = video.reAir {
-            components.append(reAir)
-        }
-        
-        let result = components.joined(separator: " • ")
-        print("🎯 Metadata for '\(video.title)': '\(result)' (network: \(video.network ?? "nil"), league: \(video.league ?? "nil"))")
-        return result
-    }
     
 }
 
@@ -988,7 +1077,7 @@ struct PosterVideoCard: View {
                         VStack(alignment: .leading, spacing: 2) {
                             // Display metadata with proper wrapping
                             if hasVideoMetadata(video) {
-                                Text(buildMetadataText(for: video))
+                                Text(video.metadataText)
                                     .font(.system(size: 9))
                                     .foregroundColor(.gray)
                                     .lineLimit(nil)
@@ -1020,31 +1109,6 @@ struct PosterVideoCard: View {
         return video.network != nil || video.reAir != nil || video.eventName != nil
     }
     
-    private func buildMetadataText(for video: VideoItem) -> String {
-        var components: [String] = []
-        
-        // Add network if available and not generic
-        if let network = video.network, !network.isEmpty {
-            components.append(network)
-        }
-        
-        // Add league/sport info if available and different from network
-        if let league = video.league, !league.isEmpty, league != "ESPN" {
-            // Don't duplicate if league is same as network
-            if video.network != league {
-                components.append(league)
-            }
-        }
-        
-        // Add re-air info if applicable
-        if let reAir = video.reAir {
-            components.append(reAir)
-        }
-        
-        let result = components.joined(separator: " • ")
-        print("🎯 Metadata for '\(video.title)': '\(result)' (network: \(video.network ?? "nil"), league: \(video.league ?? "nil"))")
-        return result
-    }
 }
 
 /// Show video card: For 4:3 aspect ratio content like shows
@@ -1123,7 +1187,7 @@ struct ShowVideoCard: View {
                         VStack(alignment: .leading, spacing: 2) {
                             // Display metadata with proper wrapping
                             if hasVideoMetadata(video) {
-                                Text(buildMetadataText(for: video))
+                                Text(video.metadataText)
                                     .font(.system(size: 9))
                                     .foregroundColor(.gray)
                                     .lineLimit(nil)
@@ -1155,31 +1219,6 @@ struct ShowVideoCard: View {
         return video.network != nil || video.reAir != nil || video.eventName != nil
     }
     
-    private func buildMetadataText(for video: VideoItem) -> String {
-        var components: [String] = []
-        
-        // Add network if available and not generic
-        if let network = video.network, !network.isEmpty {
-            components.append(network)
-        }
-        
-        // Add league/sport info if available and different from network
-        if let league = video.league, !league.isEmpty, league != "ESPN" {
-            // Don't duplicate if league is same as network
-            if video.network != league {
-                components.append(league)
-            }
-        }
-        
-        // Add re-air info if applicable
-        if let reAir = video.reAir {
-            components.append(reAir)
-        }
-        
-        let result = components.joined(separator: " • ")
-        print("🎯 Metadata for '\(video.title)': '\(result)' (network: \(video.network ?? "nil"), league: \(video.league ?? "nil"))")
-        return result
-    }
 }
 
 /// Medium video card: 2 cards + peek of 3rd (approximately 160px each + 32px peek)
@@ -1254,7 +1293,7 @@ struct MediumVideoCard: View {
                         VStack(alignment: .leading, spacing: 2) {
                             // Display metadata with proper wrapping
                             if hasVideoMetadata(video) {
-                                Text(buildMetadataText(for: video))
+                                Text(video.metadataText)
                                     .font(.system(size: 9))
                                     .foregroundColor(.gray)
                                     .lineLimit(nil)
@@ -1286,31 +1325,6 @@ struct MediumVideoCard: View {
         return video.network != nil || video.reAir != nil || video.eventName != nil
     }
     
-    private func buildMetadataText(for video: VideoItem) -> String {
-        var components: [String] = []
-        
-        // Add network if available and not generic
-        if let network = video.network, !network.isEmpty {
-            components.append(network)
-        }
-        
-        // Add league/sport info if available and different from network
-        if let league = video.league, !league.isEmpty, league != "ESPN" {
-            // Don't duplicate if league is same as network
-            if video.network != league {
-                components.append(league)
-            }
-        }
-        
-        // Add re-air info if applicable
-        if let reAir = video.reAir {
-            components.append(reAir)
-        }
-        
-        let result = components.joined(separator: " • ")
-        print("🎯 Metadata for '\(video.title)': '\(result)' (network: \(video.network ?? "nil"), league: \(video.league ?? "nil"))")
-        return result
-    }
     
 }
 
@@ -1384,7 +1398,7 @@ struct SmallVideoCard: View {
                         
                         // Minimal metadata for small cards
                         if hasVideoMetadata(video) {
-                            Text(buildMetadataText(for: video))
+                            Text(video.metadataText)
                                 .font(.system(size: 7))
                                 .foregroundColor(.gray)
                                 .lineLimit(2)
@@ -1402,31 +1416,6 @@ struct SmallVideoCard: View {
         return video.network != nil || video.reAir != nil || video.eventName != nil
     }
     
-    private func buildMetadataText(for video: VideoItem) -> String {
-        var components: [String] = []
-        
-        // Add network if available and not generic
-        if let network = video.network, !network.isEmpty {
-            components.append(network)
-        }
-        
-        // Add league/sport info if available and different from network
-        if let league = video.league, !league.isEmpty, league != "ESPN" {
-            // Don't duplicate if league is same as network
-            if video.network != league {
-                components.append(league)
-            }
-        }
-        
-        // Add re-air info if applicable
-        if let reAir = video.reAir {
-            components.append(reAir)
-        }
-        
-        let result = components.joined(separator: " • ")
-        print("🎯 Metadata for '\(video.title)': '\(result)' (network: \(video.network ?? "nil"), league: \(video.league ?? "nil"))")
-        return result
-    }
 }
 
 // Legacy component for backward compatibility

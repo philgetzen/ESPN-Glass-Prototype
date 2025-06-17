@@ -405,6 +405,17 @@ struct VideoCategory: Identifiable, Codable {
     }
 }
 
+/// Layout type for video cards
+enum VideoLayoutType {
+    case poster  // 2:3 aspect ratio (movies)
+    case show    // 4:3 aspect ratio (shows)
+    case circle  // Circular thumbnails (leagues/sports)
+    case square  // Square thumbnails (networks/channels)
+    case large   // Large cards
+    case medium  // Medium cards (default)
+    case small   // Small cards
+}
+
 /// Individual video item within a category
 struct VideoItem: Identifiable, Codable, Equatable {
     let id = UUID()
@@ -427,11 +438,86 @@ struct VideoItem: Identifiable, Codable, Equatable {
     let reAir: String? // Re-air information if applicable
     let eventName: String? // Event name
     let ratio: String? // Aspect ratio from ESPN API (e.g., "2:3", "16:9")
+    let authType: [String]? // Authentication types required for this video
+    let streamingURL: String? // Direct streaming URL from appPlay link
+    let contentId: String? // ESPN content ID for deep linking
+    let isEvent: Bool? // Whether this is event-based content (live games, etc.)
+    let appPlayURL: String? // ESPN app deep link URL from API
+    
+    var requiresESPNApp: Bool {
+        guard let authType = authType else { return false }
+        let restrictedTypes = ["mvpd", "direct", "flagship", "isp"]
+        return authType.contains(where: restrictedTypes.contains)
+    }
+    
+    // Cached metadata text to prevent recalculation on every render
+    var metadataText: String {
+        var components: [String] = []
+        
+        // Add network if available and not generic
+        if let network = network, !network.isEmpty {
+            components.append(network)
+        }
+        
+        // Add league/sport info if available and different from network
+        if let league = league, !league.isEmpty, league != "ESPN" {
+            // Don't duplicate if league is same as network
+            if network != league {
+                components.append(league)
+            }
+        }
+        
+        // Add re-air info if applicable
+        if let reAir = reAir {
+            components.append(reAir)
+        }
+        
+        return components.joined(separator: " • ")
+    }
+    
+    // Cached layout type decisions to prevent repeated computation during scrolling
+    var layoutType: VideoLayoutType {
+        // Check for poster/movie content first (2:3)
+        if ratio == "2:3" || 
+           type?.lowercased().contains("movie") == true ||
+           type?.lowercased().contains("film") == true {
+            return .poster
+        }
+        
+        // Check for shows content (4:3)
+        if ratio == "4:3" || type?.lowercased() == "show" {
+            return .show
+        }
+        
+        // Check for circle layout (leagues, sports, conferences)
+        if type?.lowercased() == "league" ||
+           type?.lowercased() == "sport" ||
+           type?.lowercased() == "conference" {
+            return .circle
+        }
+        
+        // Check for square layout (networks, channels)
+        if type?.lowercased() == "network" ||
+           type?.lowercased() == "channel" ||
+           tags.contains("square") {
+            return .square
+        }
+        
+        // Use size-based layout
+        switch size?.lowercased() {
+        case "lg", "large":
+            return .large
+        case "sm", "small":
+            return .small
+        default:
+            return .medium
+        }
+    }
     
     enum CodingKeys: String, CodingKey {
         case title, description, thumbnailURL, videoURL, duration
         case publishedDate, sport, league, isLive, viewCount, tags, autoplay, showMetadata, size, type
-        case network, reAir, eventName, ratio
+        case network, reAir, eventName, ratio, authType, streamingURL, contentId, isEvent, appPlayURL
     }
 }
 
@@ -496,5 +582,10 @@ extension VideoItem {
         self.reAir = nil // Not available in news articles
         self.eventName = nil // Not available in news articles
         self.ratio = nil // Not available in news articles
+        self.authType = nil // Not available in news articles
+        self.streamingURL = nil // Not available in news articles
+        self.contentId = nil // Not available in news articles
+        self.isEvent = nil // Not available in news articles
+        self.appPlayURL = nil // Not available in news articles
     }
 }

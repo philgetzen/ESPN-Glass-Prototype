@@ -14,9 +14,7 @@ struct ErrorView: View {
                 .foregroundColor(.red)
                 .glowEffect(
                     color: .red,
-                    radius: 5,
-                    intensity: .subtle,
-                    pulsation: .none
+                    radius: 5
                 )
             
             // Error Message
@@ -45,9 +43,7 @@ struct ErrorView: View {
             .buttonStyle(.borderedProminent)
             .glowEffect(
                 color: .blue,
-                radius: 3,
-                intensity: .subtle,
-                pulsation: .none
+                radius: 3
             )
         }
         .padding()

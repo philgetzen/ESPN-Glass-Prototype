@@ -1,5 +1,9 @@
 import SwiftUI
 
+// Import performance optimizations - they're in the same module
+// so we don't need a separate import, but let me ensure they're accessible
+
+
 struct HomeView: View {
     @State private var viewState = HomeViewState.loading
     @State private var selectedArticle: Article?
@@ -42,6 +46,8 @@ struct HomeView: View {
                         }
                         .padding(.vertical)
                     }
+                    .scrollContentBackground(.hidden)
+                    .scrollIndicators(.hidden)
                     .safeAreaInset(edge: .bottom) { Spacer().frame(height: 60) }
                     
                 case .error(let errorMessage):
@@ -113,11 +119,13 @@ struct HomeView: View {
         }
         
         do {
-            // Fetch general news feed
+            // Fetch articles with optimized limit
             let newsArticles = try await apiService.fetchNewsFeed(limit: 30)
             
-            // Convert API articles to our Article model
-            let convertedArticles = newsArticles.map { Article(from: $0) }
+            // Convert with background processing
+            let convertedArticles = await Task.detached(priority: .userInitiated) {
+                newsArticles.map { Article(from: $0) }
+            }.value
             
             // Update on main thread
             await MainActor.run {

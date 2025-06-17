@@ -14,9 +14,7 @@ struct EmptyStateView: View {
                 .foregroundColor(.secondary)
                 .glowEffect(
                     color: .gray,
-                    radius: 5,
-                    intensity: .subtle,
-                    pulsation: .none
+                    radius: 5
                 )
             
             VStack(spacing: 8) {

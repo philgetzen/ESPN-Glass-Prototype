@@ -42,9 +42,7 @@ struct GameCard: View {
                         .fill(Color.red)
                         .glowEffect(
                             color: .red,
-                            radius: 2,
-                            intensity: .medium,
-                            pulsation: .gentle
+                            radius: 2
                         )
                 )
         } else {
@@ -220,9 +218,7 @@ struct GameCard: View {
         .background(Color.clear)
         .glowEffect(
             color: event.isLive ? .red : .clear,
-            radius: 2,
-            intensity: event.isLive ? .medium : .subtle,
-            pulsation: event.isLive ? .gentle : .none
+            radius: 2
         )
     }
     

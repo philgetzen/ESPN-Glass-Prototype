@@ -13,9 +13,7 @@ struct ESPNPullToRefreshOverlay: ViewModifier {
                             ESPNAnimatedLoadingIcon(size: 40)
                                 .glowEffect(
                                     color: .red,
-                                    radius: 8,
-                                    intensity: .intense,
-                                    pulsation: .gentle
+                                    radius: 8
                                 )
                                 .background(
                                     Circle()

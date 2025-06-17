@@ -15,9 +15,7 @@ struct LoadingView: View {
             ESPNAnimatedLoadingIcon(size: 60)
                 .glowEffect(
                     color: .red,
-                    radius: 8,
-                    intensity: .medium,
-                    pulsation: .gentle
+                    radius: 8
                 )
             
             if let message = message {

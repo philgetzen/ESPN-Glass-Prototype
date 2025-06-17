@@ -53,9 +53,7 @@ struct ESPNToolbar: ToolbarContent {
                         .font(.system(size: 16, weight: .medium))
                         .glowEffect(
                             color: .blue,
-                            radius: 3,
-                            intensity: .subtle,
-                            pulsation: .none
+                            radius: 3
                         )
                 }
                 
@@ -65,9 +63,7 @@ struct ESPNToolbar: ToolbarContent {
                         .font(.system(size: 16, weight: .medium))
                         .glowEffect(
                             color: .gray,
-                            radius: 3,
-                            intensity: .subtle,
-                            pulsation: .none
+                            radius: 3
                         )
                 }
             }

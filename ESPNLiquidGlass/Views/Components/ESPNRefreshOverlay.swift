@@ -16,9 +16,7 @@ struct ESPNRefreshOverlay: ViewModifier {
                             }
                             .glowEffect(
                                 color: .red,
-                                radius: 6,
-                                intensity: .medium,
-                                pulsation: .gentle
+                                radius: 6
                             )
                             .background(
                                 // Larger background to hide system indicator

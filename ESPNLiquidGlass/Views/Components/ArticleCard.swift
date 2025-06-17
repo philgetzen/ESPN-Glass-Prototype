@@ -39,7 +39,36 @@ struct ArticleCard: View {
                 }
             }
             .aspectRatio(16/9, contentMode: .fit)
-            .liquidGlassBackground(density: .light, flowDirection: .natural)
+            .overlay(
+                // Play icon for video articles
+                Group {
+                    if article.type == .video {
+                        ZStack {
+                            Circle()
+                                .fill(.ultraThinMaterial)
+                                .frame(width: 60, height: 60)
+                                .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
+                            
+                            Image(systemName: "play.fill")
+                                .font(.system(size: 24, weight: .bold))
+                                .foregroundColor(.white)
+                                .shadow(color: .black.opacity(0.5), radius: 2, x: 0, y: 1)
+                        }
+                    }
+                }
+            )
+            .clipShape(UnevenRoundedRectangle(cornerRadii: .init(
+                topLeading: 12,
+                bottomLeading: 0,
+                bottomTrailing: 0,
+                topTrailing: 12
+            )))
+            .background(.ultraThinMaterial, in: UnevenRoundedRectangle(cornerRadii: .init(
+                topLeading: 12,
+                bottomLeading: 0,
+                bottomTrailing: 0,
+                topTrailing: 12
+            )))
             .onTapGesture {
                 if article.type == .video && article.videoURL != nil {
                     onVideoTap()
@@ -50,7 +79,7 @@ struct ArticleCard: View {
             
             cardContent
         }
-        .liquidGlassCard(cornerRadius: 16, density: .medium)
+        .adaptiveGlassEffect(in: RoundedRectangle(cornerRadius: 16))
         .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
         .shadow(color: Color.black.opacity(0.1), radius: 16, x: 0, y: 8)
         .padding(.horizontal)
@@ -92,17 +121,6 @@ struct ArticleCard: View {
                         .foregroundColor(.red)
                 }
                 
-                if article.type == .video {
-                    if article.sport != nil || article.isPremium {
-                        Text("•")
-                            .font(.caption2)
-                            .foregroundColor(.secondary.opacity(0.6))
-                    }
-                    Text("VIDEO")
-                        .font(.caption2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.blue)
-                }
                 
                 Spacer()
                 
@@ -152,7 +170,7 @@ struct ArticleCard: View {
             }
         }
         .padding(12)
-        .liquidGlassCard(cornerRadius: 12, density: .light)
+        .adaptiveGlassEffect(in: RoundedRectangle(cornerRadius: 12))
         .shadow(color: Color.black.opacity(0.12), radius: 6, x: 0, y: 3)
         .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 6)
         .padding(.horizontal)
@@ -209,17 +227,6 @@ struct ArticleCard: View {
                         .foregroundColor(.red)
                 }
                 
-                if article.type == .video {
-                    if article.sport != nil || article.isPremium {
-                        Text("•")
-                            .font(.caption2)
-                            .foregroundColor(.secondary.opacity(0.6))
-                    }
-                    Text("VIDEO")
-                        .font(.caption2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.blue)
-                }
                 
                 Spacer()
             }

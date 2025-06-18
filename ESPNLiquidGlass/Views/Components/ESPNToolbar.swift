@@ -47,24 +47,46 @@ struct ESPNToolbar: ToolbarContent {
         
         ToolbarItem(placement: .navigationBarTrailing) {
             HStack(spacing: 16) {
-                Button(action: onSearchTap) {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(forcesDarkIcons ? .black : (isDarkMode ? .white : .primary))
-                        .font(.system(size: 16, weight: .medium))
-                        .glowEffect(
-                            color: .blue,
-                            radius: 3
-                        )
-                }
-                
-                Button(action: onSettingsTap) {
-                    Image(systemName: "gear")
-                        .foregroundColor(forcesDarkIcons ? .black : (isDarkMode ? .white : .primary))
-                        .font(.system(size: 16, weight: .medium))
-                        .glowEffect(
-                            color: .gray,
-                            radius: 3
-                        )
+                if #available(iOS 18.0, *) {
+                    // iOS 26 with Liquid Glass buttons
+                    Button(action: onSearchTap) {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(forcesDarkIcons ? .black : (isDarkMode ? .white : .primary))
+                            .font(.system(size: 16, weight: .medium))
+                    }
+                    .buttonStyle(ESPNGlassButtonStyle())
+                    
+                    Button(action: onSettingsTap) {
+                        Image(systemName: "gear")
+                            .foregroundColor(forcesDarkIcons ? .black : (isDarkMode ? .white : .primary))
+                            .font(.system(size: 16, weight: .medium))
+                    }
+                    .buttonStyle(ESPNGlassButtonStyle())
+                } else {
+                    // Fallback for older iOS versions
+                    Button(action: onSearchTap) {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(forcesDarkIcons ? .black : (isDarkMode ? .white : .primary))
+                            .font(.system(size: 16, weight: .medium))
+                            .padding(8)
+                            .background(
+                                Circle()
+                                    .fill(.ultraThinMaterial)
+                                    .shadow(color: .blue.opacity(0.3), radius: 3)
+                            )
+                    }
+                    
+                    Button(action: onSettingsTap) {
+                        Image(systemName: "gear")
+                            .foregroundColor(forcesDarkIcons ? .black : (isDarkMode ? .white : .primary))
+                            .font(.system(size: 16, weight: .medium))
+                            .padding(8)
+                            .background(
+                                Circle()
+                                    .fill(.ultraThinMaterial)
+                                    .shadow(color: .gray.opacity(0.3), radius: 3)
+                            )
+                    }
                 }
             }
         }
@@ -73,6 +95,7 @@ struct ESPNToolbar: ToolbarContent {
 
 // MARK: - Toolbar Configuration Helper
 extension View {
+    /// Apply ESPN toolbar with Liquid Glass effects
     func espnToolbar(
         logoType: ESPNToolbar.LogoType = .standardLogo,
         isDarkMode: Bool = false,
@@ -80,14 +103,93 @@ extension View {
         onSearchTap: @escaping () -> Void = {},
         onSettingsTap: @escaping () -> Void
     ) -> some View {
-        self.toolbar {
-            ESPNToolbar(
-                logoType: logoType,
-                isDarkMode: isDarkMode,
-                forcesDarkIcons: forcesDarkIcons,
-                onSearchTap: onSearchTap,
-                onSettingsTap: onSettingsTap
-            )
+        self
+            .toolbar {
+                ESPNToolbar(
+                    logoType: logoType,
+                    isDarkMode: isDarkMode,
+                    forcesDarkIcons: forcesDarkIcons,
+                    onSearchTap: onSearchTap,
+                    onSettingsTap: onSettingsTap
+                )
+            }
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+    }
+    
+    /// Apply ESPN navigation bar styling with iOS 26 Liquid Glass
+    func espnNavigationBarStyle() -> some View {
+        self
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+    }
+}
+
+// MARK: - Preview Helpers
+#Preview("ESPN Toolbar - Light Mode") {
+    NavigationStack {
+        ScrollView {
+            VStack(spacing: 20) {
+                ForEach(0..<10) { i in
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(height: 100)
+                        .overlay(Text("Content \(i)"))
+                }
+            }
+            .padding()
         }
+        .navigationTitle("ESPN")
+        .espnToolbar(
+            logoType: .standardLogo,
+            isDarkMode: false,
+            onSettingsTap: { print("Settings tapped") }
+        )
+    }
+}
+
+#Preview("ESPN Toolbar - Dark Mode") {
+    NavigationStack {
+        ScrollView {
+            VStack(spacing: 20) {
+                ForEach(0..<10) { i in
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(height: 100)
+                        .overlay(Text("Content \(i)"))
+                }
+            }
+            .padding()
+        }
+        .navigationTitle("ESPN")
+        .espnToolbar(
+            logoType: .standardLogo,
+            isDarkMode: true,
+            onSettingsTap: { print("Settings tapped") }
+        )
+    }
+    .preferredColorScheme(.dark)
+}
+
+#Preview("ESPN Toolbar - Home View") {
+    NavigationStack {
+        ScrollView {
+            VStack(spacing: 20) {
+                ForEach(0..<10) { i in
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(height: 100)
+                        .overlay(Text("Content \(i)"))
+                }
+            }
+            .padding()
+        }
+        .navigationTitle("Home")
+        .espnToolbar(
+            logoType: .roundLogo,
+            isDarkMode: false,
+            onSettingsTap: { print("Settings tapped") }
+        )
     }
 }

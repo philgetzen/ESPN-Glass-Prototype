@@ -1,5 +1,7 @@
 import SwiftUI
 
+// MARK: - ScoresView
+
 struct ScoresView: View {
     @State private var viewState = ScoresViewState.loading
     @State private var selectedDate = Date()
@@ -115,7 +117,16 @@ struct ScoresView: View {
             .adaptiveBackground()
             .navigationTitle("Scores")
             .navigationBarTitleDisplayMode(.inline)
-            .espnToolbar(onSettingsTap: { showSettings = true })
+            .espnGlassToolbar()
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { showSettings = true }) {
+                        Image(systemName: "gearshape.fill")
+                            .font(.body)
+                            .foregroundStyle(.primary)
+                    }
+                }
+            }
             .task {
                 await loadScores()
             }
@@ -355,9 +366,7 @@ struct DateButton: View {
                 .padding(.horizontal, isToday && !isSelected ? 3 : 0)
                 .glowEffect(
                     color: isSelected ? .red : .clear,
-                    radius: 4,
-                    intensity: isSelected ? .medium : .subtle,
-                    pulsation: .none
+                    radius: 4
                 )
                 .shadow(color: isSelected ? .red.opacity(0.3) : .clear, radius: 4, x: 0, y: 2)
         )
@@ -386,9 +395,7 @@ struct SportToggle: View {
                     .fill(isSelected ? Color.yellow : Color.gray.opacity(0.15))
                     .glowEffect(
                         color: isSelected ? .yellow : .clear,
-                        radius: 3,
-                        intensity: isSelected ? .medium : .subtle,
-                        pulsation: .none
+                        radius: 3
                     )
                     .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
             )
@@ -467,7 +474,7 @@ struct GamesList: View {
                     }
                 }
             }
-            .liquidGlassCard(cornerRadius: 16, density: .medium)
+            .espnGlassCard(cornerRadius: 16, density: ESPNGlassDensity.medium)
             .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
             .shadow(color: Color.black.opacity(0.1), radius: 16, x: 0, y: 8)
             .padding(.horizontal, 16)

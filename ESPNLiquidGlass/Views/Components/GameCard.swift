@@ -40,11 +40,10 @@ struct GameCard: View {
                 .background(
                     Capsule()
                         .fill(Color.red)
-                        .glowEffect(
-                            color: .red,
-                            radius: 2
-                        )
                 )
+                .shadow(color: .red.opacity(0.5), radius: 4, x: 0, y: 2)
+                // Using the glowEffect from our unified glass effects
+                .glowEffect(color: .red, radius: 3)
         } else {
             // Empty space to maintain layout consistency
             Color.clear
@@ -216,10 +215,7 @@ struct GameCard: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
         .background(Color.clear)
-        .glowEffect(
-            color: event.isLive ? .red : .clear,
-            radius: 2
-        )
+        .espnLiveGameGlass(isLive: event.isLive)
     }
     
     private func teamRow(team: ESPNEvent.Competition.Competitor?, isWinner: Bool) -> some View {

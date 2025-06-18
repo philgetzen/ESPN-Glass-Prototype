@@ -10,9 +10,7 @@ struct ESPNRefreshIndicator: View {
                 ESPNAnimatedLoadingIcon(size: 40)
                     .glowEffect(
                         color: .red,
-                        radius: 6,
-                        intensity: .medium,
-                        pulsation: .gentle
+                        radius: 6
                     )
                     .opacity(isVisible ? 1 : 0)
                     .scaleEffect(isVisible ? 1 : 0.8)

@@ -15,128 +15,145 @@ struct ArticleCard: View {
         }
     }
     
+    // MARK: - Full Card with Image
     private var fullCardWithImage: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Image with Liquid Glass background
-            Group {
-                if let imageURL = article.imageURL, let url = URL(string: imageURL) {
-                    AsyncImage(url: url) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                    } placeholder: {
-                        Rectangle()
-                            .fill(LinearGradient(
-                                colors: [Color.gray.opacity(0.3), Color.gray.opacity(0.1)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ))
-                            .overlay(
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle())
-                            )
-                    }
-                }
-            }
-            .aspectRatio(16/9, contentMode: .fit)
-            .overlay(
-                // Play icon for video articles
-                Group {
-                    if article.type == .video {
-                        ZStack {
-                            Circle()
-                                .fill(.ultraThinMaterial)
-                                .frame(width: 60, height: 60)
-                                .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
-                            
-                            Image(systemName: "play.fill")
-                                .font(.system(size: 24, weight: .bold))
-                                .foregroundColor(.white)
-                                .shadow(color: .black.opacity(0.5), radius: 2, x: 0, y: 1)
-                        }
-                    }
-                }
-            )
-            .clipShape(UnevenRoundedRectangle(cornerRadii: .init(
-                topLeading: 12,
-                bottomLeading: 0,
-                bottomTrailing: 0,
-                topTrailing: 12
-            )))
-            .background(.ultraThinMaterial, in: UnevenRoundedRectangle(cornerRadii: .init(
-                topLeading: 12,
-                bottomLeading: 0,
-                bottomTrailing: 0,
-                topTrailing: 12
-            )))
-            .onTapGesture {
-                if article.type == .video && article.videoURL != nil {
-                    onVideoTap()
-                } else {
-                    onArticleTap()
-                }
-            }
+            // Image section
+            articleImageView
             
+            // Content section
             cardContent
         }
-        .adaptiveGlassEffect(in: RoundedRectangle(cornerRadius: 16))
-        .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
-        .shadow(color: Color.black.opacity(0.1), radius: 16, x: 0, y: 8)
+        .espnGlassCard(cornerRadius: 16)
         .padding(.horizontal)
         .onTapGesture {
             onArticleTap()
         }
     }
     
-    private var collapsedCard: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                // Premium and Sport indicators
-                if article.isPremium {
-                    HStack(spacing: 2) {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.caption2)
-                        Text("ESPN+")
-                            .font(.caption2)
-                            .fontWeight(.bold)
-                    }
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [Color.blue, Color.purple],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                }
-                
-                if let sport = article.sport {
-                    if article.isPremium {
-                        Text("•")
-                            .font(.caption2)
-                            .foregroundColor(.secondary.opacity(0.6))
-                    }
-                    Text(sport.rawValue.uppercased())
-                        .font(.caption2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.red)
-                }
-                
-                
-                Spacer()
-                
-                // Time and author
-                HStack(spacing: 4) {
-                    Text(article.author)
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                    Text("•")
-                        .font(.caption2)
-                        .foregroundColor(.secondary.opacity(0.6))
-                    Text(article.formattedDate)
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
+    // MARK: - Article Image View
+    private var articleImageView: some View {
+        ZStack {
+            // Background image
+            imageContainer
+            
+            // Play button overlay for videos
+            if article.type == .video {
+                playButtonOverlay
+            }
+        }
+        .aspectRatio(16/9, contentMode: .fit)
+        .clipShape(imageClipShape)
+        .background(.ultraThinMaterial, in: imageClipShape)
+        .onTapGesture {
+            handleImageTap()
+        }
+    }
+    
+    // MARK: - Image Container
+    private var imageContainer: some View {
+        Group {
+            if let imageURL = article.imageURL, let url = URL(string: imageURL) {
+                AsyncImage(url: url) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    imagePlaceholder
                 }
             }
+        }
+    }
+    
+    // MARK: - Image Placeholder
+    private var imagePlaceholder: some View {
+        Rectangle()
+            .fill(placeholderGradient)
+            .overlay(
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle())
+            )
+    }
+    
+    // MARK: - Placeholder Gradient
+    private var placeholderGradient: LinearGradient {
+        LinearGradient(
+            colors: [Color.gray.opacity(0.3), Color.gray.opacity(0.1)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+    
+    // MARK: - Image Clip Shape
+    private var imageClipShape: UnevenRoundedRectangle {
+        UnevenRoundedRectangle(cornerRadii: .init(
+            topLeading: 12,
+            bottomLeading: 0,
+            bottomTrailing: 0,
+            topTrailing: 12
+        ))
+    }
+    
+    // MARK: - Play Button Overlay
+    @ViewBuilder
+    private var playButtonOverlay: some View {
+        if #available(iOS 18.0, *) {
+            modernPlayButton
+        } else {
+            legacyPlayButton
+        }
+    }
+    
+    // MARK: - Modern Play Button (iOS 18+)
+    @available(iOS 18.0, *)
+    private var modernPlayButton: some View {
+        ZStack {
+            Circle()
+                .fill(.ultraThinMaterial)
+                .frame(width: 60, height: 60)
+                .glassEffect(
+                    .regular,
+                    in: Circle()
+                )
+            
+            playIcon
+        }
+    }
+    
+    // MARK: - Legacy Play Button
+    private var legacyPlayButton: some View {
+        ZStack {
+            Circle()
+                .fill(.ultraThinMaterial)
+                .frame(width: 60, height: 60)
+                .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
+            
+            playIcon
+        }
+    }
+    
+    // MARK: - Play Icon
+    private var playIcon: some View {
+        Image(systemName: "play.fill")
+            .font(.system(size: 24, weight: .bold))
+            .foregroundColor(.white)
+            .shadow(color: .black.opacity(0.5), radius: 2, x: 0, y: 1)
+    }
+    
+    // MARK: - Handle Image Tap
+    private func handleImageTap() {
+        if article.type == .video && article.videoURL != nil {
+            onVideoTap()
+        } else {
+            onArticleTap()
+        }
+    }
+    
+    // MARK: - Collapsed Card (No Image)
+    private var collapsedCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // Header row
+            collapsedCardHeader
             
             // Title
             Text(article.title)
@@ -145,40 +162,40 @@ struct ArticleCard: View {
                 .foregroundColor(.primary)
                 .lineLimit(2)
             
-            // Bottom engagement
-            HStack {
-                Spacer()
-                
-                // Simplified engagement
-                HStack(spacing: 12) {
-                    HStack(spacing: 2) {
-                        Image(systemName: "heart")
-                            .font(.caption2)
-                        Text(formatNumber(article.likes))
-                            .font(.caption2)
-                    }
-                    .foregroundColor(.secondary)
-                    
-                    HStack(spacing: 2) {
-                        Image(systemName: "message")
-                            .font(.caption2)
-                        Text(formatNumber(article.comments))
-                            .font(.caption2)
-                    }
-                    .foregroundColor(.secondary)
-                }
-            }
+            // Footer
+            collapsedCardFooter
         }
         .padding(12)
-        .adaptiveGlassEffect(in: RoundedRectangle(cornerRadius: 12))
-        .shadow(color: Color.black.opacity(0.12), radius: 6, x: 0, y: 3)
-        .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 6)
+        .espnGlassCard(cornerRadius: 12)
         .padding(.horizontal)
         .onTapGesture {
             onArticleTap()
         }
     }
     
+    // MARK: - Collapsed Card Header
+    private var collapsedCardHeader: some View {
+        HStack {
+            // Premium and Sport indicators
+            premiumBadge
+            sportBadge
+            
+            Spacer()
+            
+            // Time and author
+            authorDateInfo
+        }
+    }
+    
+    // MARK: - Collapsed Card Footer
+    private var collapsedCardFooter: some View {
+        HStack {
+            Spacer()
+            engagementStats
+        }
+    }
+    
+    // MARK: - Card Content
     private var cardContent: some View {
         VStack(alignment: .leading, spacing: 8) {
             // Title
@@ -196,81 +213,113 @@ struct ArticleCard: View {
                     .lineLimit(2)
             }
             
-            // Metadata row 1: Premium, Sport, Type
-            HStack {
-                if article.isPremium {
-                    HStack(spacing: 3) {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.caption2)
-                        Text("ESPN+")
-                            .font(.caption2)
-                            .fontWeight(.bold)
-                    }
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [Color.blue, Color.purple],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                }
-                
-                if let sport = article.sport {
-                    if article.isPremium {
-                        Text("•")
-                            .font(.caption2)
-                            .foregroundColor(.secondary.opacity(0.6))
-                    }
-                    Text(sport.rawValue.uppercased())
-                        .font(.caption2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.red)
-                }
-                
-                
-                Spacer()
-            }
-            
-            // Metadata row 2: Author and Date
-            HStack {
-                Text(article.author)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                Text("•")
-                    .font(.caption)
-                    .foregroundColor(.secondary.opacity(0.6))
-                
-                Text(article.formattedDate)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                Spacer()
-                
-                // Simplified engagement
-                HStack(spacing: 12) {
-                    HStack(spacing: 3) {
-                        Image(systemName: "heart")
-                            .font(.caption)
-                        Text(formatNumber(article.likes))
-                            .font(.caption)
-                    }
-                    .foregroundColor(.secondary)
-                    
-                    HStack(spacing: 3) {
-                        Image(systemName: "message")
-                            .font(.caption)
-                        Text(formatNumber(article.comments))
-                            .font(.caption)
-                    }
-                    .foregroundColor(.secondary)
-                }
-            }
+            // Metadata
+            cardMetadata
         }
         .padding(.horizontal)
         .padding(.bottom)
     }
     
+    // MARK: - Card Metadata
+    private var cardMetadata: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            // Row 1: Premium and Sport
+            HStack {
+                premiumBadge
+                sportBadge
+                Spacer()
+            }
+            
+            // Row 2: Author, Date, and Engagement
+            HStack {
+                authorDateInfo
+                Spacer()
+                engagementStats
+            }
+        }
+    }
+    
+    // MARK: - Premium Badge
+    @ViewBuilder
+    private var premiumBadge: some View {
+        if article.isPremium {
+            HStack(spacing: 3) {
+                Image(systemName: "plus.circle.fill")
+                    .font(.caption2)
+                Text("ESPN+")
+                    .font(.caption2)
+                    .fontWeight(.bold)
+            }
+            .foregroundStyle(premiumGradient)
+        }
+    }
+    
+    // MARK: - Premium Gradient
+    private var premiumGradient: LinearGradient {
+        LinearGradient(
+            colors: [Color.blue, Color.purple],
+            startPoint: .leading,
+            endPoint: .trailing
+        )
+    }
+    
+    // MARK: - Sport Badge
+    @ViewBuilder
+    private var sportBadge: some View {
+        if let sport = article.sport {
+            HStack(spacing: 4) {
+                if article.isPremium {
+                    Text("•")
+                        .font(.caption2)
+                        .foregroundColor(.secondary.opacity(0.6))
+                }
+                Text(sport.rawValue.uppercased())
+                    .font(.caption2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.red)
+            }
+        }
+    }
+    
+    // MARK: - Author Date Info
+    private var authorDateInfo: some View {
+        HStack(spacing: 4) {
+            Text(article.author)
+                .font(.caption2)
+                .foregroundColor(.secondary)
+            Text("•")
+                .font(.caption2)
+                .foregroundColor(.secondary.opacity(0.6))
+            Text(article.formattedDate)
+                .font(.caption2)
+                .foregroundColor(.secondary)
+        }
+    }
+    
+    // MARK: - Engagement Stats
+    private var engagementStats: some View {
+        HStack(spacing: 12) {
+            // Likes
+            HStack(spacing: 3) {
+                Image(systemName: "heart")
+                    .font(.caption)
+                Text(formatNumber(article.likes))
+                    .font(.caption)
+            }
+            .foregroundColor(.secondary)
+            
+            // Comments
+            HStack(spacing: 3) {
+                Image(systemName: "message")
+                    .font(.caption)
+                Text(formatNumber(article.comments))
+                    .font(.caption)
+            }
+            .foregroundColor(.secondary)
+        }
+    }
+    
+    // MARK: - Helper Functions
     private func formatNumber(_ number: Int) -> String {
         if number >= 1000 {
             return String(format: "%.1fK", Double(number) / 1000.0)

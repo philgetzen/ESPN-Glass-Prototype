@@ -26,9 +26,14 @@
 		8B4EC3302DFA6C0100A0F0FD /* ESPNAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4EC3312DFA6C0100A0F0FD /* ESPNAPIService.swift */; };
 		8B4EC3332DFA6D0000A0F0FD /* VideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4EC3342DFA6D0000A0F0FD /* VideoPlayerView.swift */; };
 		8BD003CD2DFE920200E75FAD /* ESPNWatchAPIParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD003CC2DFE920200E75FAD /* ESPNWatchAPIParser.swift */; };
+		8BD003DB2E0229E700E75FAD /* iOS26GlassDemo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD003DA2E0229E700E75FAD /* iOS26GlassDemo.swift */; };
+		8BD003DE2E022A9300E75FAD /* iOS26APITest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD003DC2E022A9300E75FAD /* iOS26APITest.swift */; };
+		8BD003DF2E022A9300E75FAD /* RealGlassEffectExamples.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD003DD2E022A9300E75FAD /* RealGlassEffectExamples.swift */; };
+		8BD003E32E022AB400E75FAD /* ScrollToTopModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD003E12E022AB400E75FAD /* ScrollToTopModifier.swift */; };
+		8BD003F42E02664E00E75FAD /* ESPNGlassEffects_Unified.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD003F22E02664E00E75FAD /* ESPNGlassEffects_Unified.swift */; };
+		8BD003F52E02664E00E75FAD /* GlassEffectsTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD003F32E02664E00E75FAD /* GlassEffectsTestView.swift */; };
 		97A6DD0F499A5EAFEFC3A037 /* MoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59FA27E5C8EB0662F63B4B20 /* MoreView.swift */; };
 		9B9D378DF72B0B039CAA04A0 /* ScoresView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB9650F17DB9016F4EEF37BD /* ScoresView.swift */; };
-		9C39DF3111BA9CD51451DD73 /* LiquidGlassEffects.swift in Sources */ = {isa = PBXBuildFile; fileRef = C08CCE6AAC952D4BAF444B4D /* LiquidGlassEffects.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,9 +59,14 @@
 		8B4EC3312DFA6C0100A0F0FD /* ESPNAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ESPNAPIService.swift; sourceTree = "<group>"; };
 		8B4EC3342DFA6D0000A0F0FD /* VideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerView.swift; sourceTree = "<group>"; };
 		8BD003CC2DFE920200E75FAD /* ESPNWatchAPIParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ESPNWatchAPIParser.swift; sourceTree = "<group>"; };
+		8BD003DA2E0229E700E75FAD /* iOS26GlassDemo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOS26GlassDemo.swift; sourceTree = "<group>"; };
+		8BD003DC2E022A9300E75FAD /* iOS26APITest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOS26APITest.swift; sourceTree = "<group>"; };
+		8BD003DD2E022A9300E75FAD /* RealGlassEffectExamples.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealGlassEffectExamples.swift; sourceTree = "<group>"; };
+		8BD003E12E022AB400E75FAD /* ScrollToTopModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollToTopModifier.swift; sourceTree = "<group>"; };
+		8BD003F22E02664E00E75FAD /* ESPNGlassEffects_Unified.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ESPNGlassEffects_Unified.swift; sourceTree = "<group>"; };
+		8BD003F32E02664E00E75FAD /* GlassEffectsTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassEffectsTestView.swift; sourceTree = "<group>"; };
 		9A5A71C2D41226D0ECBB7B96 /* ESPNLiquidGlassApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ESPNLiquidGlassApp.swift; sourceTree = "<group>"; };
 		AB9650F17DB9016F4EEF37BD /* ScoresView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoresView.swift; sourceTree = "<group>"; };
-		C08CCE6AAC952D4BAF444B4D /* LiquidGlassEffects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidGlassEffects.swift; sourceTree = "<group>"; };
 		D20D399CC915C46B129E7648 /* ESPN.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ESPN.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -85,8 +95,10 @@
 		3C922A91825F840B3E279FB7 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				8BD003F22E02664E00E75FAD /* ESPNGlassEffects_Unified.swift */,
+				8BD003F32E02664E00E75FAD /* GlassEffectsTestView.swift */,
+				8BD003E12E022AB400E75FAD /* ScrollToTopModifier.swift */,
 				8B473A352DFDBE2100D534FA /* BackgroundModifier.swift */,
-				C08CCE6AAC952D4BAF444B4D /* LiquidGlassEffects.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -116,6 +128,7 @@
 		8C8120A40B010B3BBCD463BF /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				8BD003DA2E0229E700E75FAD /* iOS26GlassDemo.swift */,
 				8B473A242DFCB40400D534FA /* Components */,
 				8B4EC3282DFA68CF00A0F0FD /* SettingsView.swift */,
 				50509C1FEAE73A8195BBD35A /* ArticleDetailView.swift */,
@@ -133,6 +146,8 @@
 		B3AA3FAD822A8041662D358A /* ESPNLiquidGlass */ = {
 			isa = PBXGroup;
 			children = (
+				8BD003DC2E022A9300E75FAD /* iOS26APITest.swift */,
+				8BD003DD2E022A9300E75FAD /* RealGlassEffectExamples.swift */,
 				8B4EC32B2DFA6B8200A0F0FD /* Assets.xcassets */,
 				8B4EC32A2DFA6B0D00A0F0FD /* ESPN_Logo.svg */,
 				62C0BA29358983FDB7E51123 /* .gitignore */,
@@ -227,14 +242,18 @@
 			files = (
 				8B4EC3292DFA68CF00A0F0FD /* SettingsView.swift in Sources */,
 				600C27D05B56464CC0DF27AA /* Article.swift in Sources */,
+				8BD003DE2E022A9300E75FAD /* iOS26APITest.swift in Sources */,
+				8BD003DF2E022A9300E75FAD /* RealGlassEffectExamples.swift in Sources */,
 				1978136D96DFA7845AA5D83D /* ArticleDetailView.swift in Sources */,
 				77734226503B19848E001A4E /* ContentView.swift in Sources */,
+				8BD003DB2E0229E700E75FAD /* iOS26GlassDemo.swift in Sources */,
+				8BD003F42E02664E00E75FAD /* ESPNGlassEffects_Unified.swift in Sources */,
+				8BD003F52E02664E00E75FAD /* GlassEffectsTestView.swift in Sources */,
 				15EF8D6224E310BE1B847DF4 /* ESPNLiquidGlassApp.swift in Sources */,
 				627A2E1096375815715DC193 /* ESPNPlusView.swift in Sources */,
 				37765627C8FDAC8E9BFE4B56 /* Game.swift in Sources */,
 				60AB65173A50EDBB7A49CCB8 /* HomeView.swift in Sources */,
 				02005633206C6F040E54D457 /* League.swift in Sources */,
-				9C39DF3111BA9CD51451DD73 /* LiquidGlassEffects.swift in Sources */,
 				97A6DD0F499A5EAFEFC3A037 /* MoreView.swift in Sources */,
 				9B9D378DF72B0B039CAA04A0 /* ScoresView.swift in Sources */,
 				188BDA23F897ECCE41B17152 /* Sport.swift in Sources */,
@@ -243,6 +262,7 @@
 				8BD003CD2DFE920200E75FAD /* ESPNWatchAPIParser.swift in Sources */,
 				8B4EC32E2DFA6C0000A0F0FD /* ESPNAPIModels.swift in Sources */,
 				8B4EC3302DFA6C0100A0F0FD /* ESPNAPIService.swift in Sources */,
+				8BD003E32E022AB400E75FAD /* ScrollToTopModifier.swift in Sources */,
 				8B4EC3332DFA6D0000A0F0FD /* VideoPlayerView.swift in Sources */,
 				8B473A362DFDBE2100D534FA /* BackgroundModifier.swift in Sources */,
 			);

@@ -57,5 +57,9 @@
         <key>NSAllowsArbitraryLoadsInWebContent</key>
         <true/>
     </dict>
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+        <string>sportscenter</string>
+    </array>
 </dict>
 </plist>

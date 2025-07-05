@@ -1,9 +1,9 @@
 # ESPN Liquid Glass Prototype
 
-> **🚧 Work in Progress** - This is an experimental prototype showcasing iOS 26's cutting-edge Liquid Glass APIs  
-> **🔮 iOS 26 Native Glass Effects in Production** ✨
+> **🚧 Work in Progress** - This is an experimental prototype showcasing iOS 26's Liquid Glass APIs  
+> **iOS 26 Native Glass Effects in Beta** ✨
 
-A cutting-edge ESPN sports app prototype demonstrating iOS 26's native Liquid Glass APIs with real ESPN content integration. This project serves as a proof-of-concept for next-generation glass morphing effects and advanced SwiftUI patterns.
+A reimagined ESPN app prototype demonstrating iOS 26's native Liquid Glass APIs with real ESPN content integration. This project serves as a proof-of-concept for next-generation glass morphing effects, advanced SwiftUI patterns, and modern sports content consumption.
 
 ## 🚀 Quick Start
 
@@ -26,47 +26,58 @@ open ESPNLiquidGlass.xcodeproj
     build
 ```
 
-## 📚 Documentation Structure
-
-### 🎯 **Start Here**
-- **[iOS26_QUICK_REFERENCE.md](iOS26_QUICK_REFERENCE.md)** - Essential build commands, native APIs, daily development reference
-- **[CLAUDE.md](CLAUDE.md)** - Complete project overview, architecture, and feature documentation
-
-### 📖 **Comprehensive Guides**
-- **[iOS26_BUILD_SUCCESS_GUIDE.md](iOS26_BUILD_SUCCESS_GUIDE.md)** - Definitive proof iOS 26 exists with full build process
-- **[Development/docs/](Development/docs/)** - Latest Swift/SwiftUI documentation and patterns
-
-### 📋 **Reference & History**
-- **[BUILD_SUCCESS_LOG.md](BUILD_SUCCESS_LOG.md)** - Build history and environment records
-- **[docs/scripts/](docs/scripts/)** - Build automation and utility scripts
-
-## ✨ Key Features
-
-### 🔮 iOS 26 Native Glass Effects
-- **`.glassEffect(.regular)`** - Standard glass effect
-- **`.glassEffect(.prominent)`** - Enhanced glass effect  
-- **`.glassEffect(.thick)`** - Maximum glass density
-- **`GlassButtonStyle()`** - Native glass button styling
-- **`GlassEffectContainer`** - Morphing glass shapes
-- **Interactive glass** - Touch-responsive glass effects
+## ✨ Highlights
 
 ### 🏈 Real ESPN Content Integration
-- **Live Scores** - Real-time sports scores and updates
-- **News Feed** - ESPN articles with smart image selection
-- **Video Streaming** - ESPN Watch integration with authentication
-- **Multiple Sports** - NFL, NBA, MLB, NHL, and more
+- **Live Scores** - Real-time sports scores and updates with live status indicators
+- **News Feed** - ESPN articles with clips support (full article deeplinks to ESPN app)
+- **Video Streaming** - ESPN Watch integration with authentication handling (clips play back, authed content goes to ESPN app)
+- **Multiple Sports** - NFL, NBA, MLB, NHL, NCAA, and international leagues
+- **Smart Content Parsing** - Automatic categorization and metadata extraction
+- **Deep Linking** - ESPN app integration for premium content access
 
-### 📱 Modern Architecture
-- **SwiftUI** - Declarative UI with iOS 26 APIs
-- **Structured Concurrency** - Async/await patterns
-- **Performance Optimized** - Off-thread image loading, NSCache integration
-- **Clean Architecture** - Modular components, clear separation of concerns
+### 📱 Modern SwiftUI Architecture
+- **SwiftUI 6.0** - Latest declarative UI patterns with iOS 26 APIs
+- **Structured Concurrency** - Modern async/await patterns with actor isolation
+- **Performance Optimized** - Off-thread image loading with NSCache integration
+- **Clean Architecture** - MVVM pattern with clear separation of concerns
+- **Modular Components** - Reusable UI components with consistent styling
+- **Dark Mode Support** - Fully adaptive interface with automatic theme detection
 
-### ⚡ Advanced Performance
-- **CachedNonBlockingImage** - Custom image loader that never blocks main thread
-- **Parallel API Loading** - Multiple ESPN APIs loaded concurrently
-- **Smart Memory Management** - NSCache with automatic cleanup
-- **Glass Optimization** - `drawingGroup()` and `compositingGroup()` for smooth rendering
+### 🎨 Design System
+- **ESPN Brand Colors** - Authentic ESPN color palette with glass adaptations
+- **Consistent Spacing** - 8pt grid system throughout the app
+- **Accessibility** - VoiceOver support and dynamic type scaling
+- **Responsive Layout** - Adaptive layouts for different screen sizes
+- **Animation System** - Smooth transitions and micro-interactions
+
+## 🎯 App Features & Navigation
+
+### 🏠 Home Tab
+- **News Feed** - Latest ESPN articles with glass card design
+- **Breaking News** - Priority stories with prominent glass effects
+- **Article Cards** - Smart image selection with 16:9 aspect ratios
+- **Pull-to-Refresh** - Custom glass-styled refresh indicator
+- **Infinite Scroll** - Smooth performance with background loading
+
+### 🏆 Scores Tab
+- **Live Scores** - Real-time game scores with live indicators
+- **Multiple Sports** - NFL, NBA, MLB, NHL, NCAA coverage
+- **Date Navigation** - Swipe between dates with glass transitions
+- **Game Details** - Team logos, records, and game status
+- **Score Updates** - Automatic refresh for live games
+
+### 📺 Watch Tab
+- **Video Categories** - Organized content with different card layouts
+- **Live Content** - Live streams with prominent "LIVE" indicators
+- **Video Cards** - Multiple aspect ratios (16:9, 2:3, 4:3, 1:1)
+- **Circle Cards** - League and sport logos with glass effects
+- **Deep Linking** - Seamless ESPN app integration
+
+### ESPN API Constraints
+- **Rate Limiting** - API calls throttled during heavy usage
+- **Video Authentication** - Most content requires ESPN+ subscription or TVE Authentication
+- **Image Selection** - Occasional aspect ratio mismatches
 
 ## 🛠 Technical Requirements
 
@@ -82,100 +93,9 @@ open ESPNLiquidGlass.xcodeproj
 - **Fallback**: iOS 18.0+ devices - Limited glass effects
 - **Legacy**: iOS 17.0+ devices - Material effects only
 
-## 🎉 Project Status
-
-### ✅ **CONFIRMED WORKING**
-- **iOS 26 SDK Integration** - Successfully builds with `iphonesimulator26.0.sdk`
-- **Native Glass APIs** - All `.glassEffect()` variants functional
-- **ESPN API Integration** - Live data streaming from ESPN services
-- **Performance Optimization** - Smooth 60fps glass animations
-- **iPhone 16 Pro Simulator** - Full testing environment operational
-
 ### 🚧 **Work in Progress**
 - **Advanced Glass Morphing** - Experimenting with complex shape transitions
-- **Video Playback Enhancement** - Improving ESPN Watch integration
-- **Additional Sports Coverage** - Expanding beyond major leagues
-- **Accessibility Features** - VoiceOver support for glass effects
-- **Performance Profiling** - Optimizing glass rendering on older devices
-
-### 🔮 **Future Enhancements**
-- **3D Glass Effects** - Exploring depth-based glass rendering
-- **Haptic Feedback** - Touch response for glass interactions
-- **Widget Support** - iOS 26 glass widgets for home screen
-- **Dynamic Island** - Glass effects in Dynamic Island experiences
-
-## 📋 Architecture Overview
-
-### Core Components
-```
-ESPNLiquidGlass/
-├── Core/                          # Business logic and services
-│   ├── API/                       # ESPN API integration
-│   └── Models/                    # Data models with smart image selection
-├── Views/                         # SwiftUI interface
-│   ├── HomeView.swift             # News feed with glass cards
-│   ├── ScoresView.swift           # Live scores with glass effects
-│   ├── WatchView.swift            # Video content with glass overlays
-│   └── Components/                # Reusable UI components
-└── Utils/                         # Glass effects and optimizations
-```
-
-### Key Technologies
-- **iOS 26 Glass APIs** - Native `.glassEffect()` modifiers
-- **ESPN REST APIs** - Real sports data integration
-- **SwiftUI 6.0** - Latest declarative UI patterns
-- **Structured Concurrency** - Modern async/await architecture
-- **Performance Optimization** - Custom image caching and rendering
-
-## 🔧 Development Guidelines
-
-### Glass Effect Usage
-```swift
-// ✅ Correct - Native iOS 26 glass
-Text("Live Score")
-    .glassEffect(.prominent, in: RoundedRectangle(cornerRadius: 16))
-
-// ✅ Correct - Interactive glass
-Button("Watch Live") { }
-    .glassEffect(.regular.interactive(isPressed), in: Capsule())
-
-// ✅ Correct - Glass morphing container
-GlassEffectContainer {
-    VStack { /* morphable content */ }
-}
-```
-
-### Performance Best Practices
-- Use `CachedNonBlockingImage` for all network images
-- Implement `.drawingGroup()` for complex glass hierarchies
-- Leverage structured concurrency for parallel API calls
-- Cache expensive glass computations
-
-## 🐛 Known Issues & Limitations
-
-### iOS 26 Beta Limitations
-- **Simulator Only** - Physical iOS 26 devices not yet available
-- **Beta APIs** - Some glass effects may change in final release
-- **Performance** - Glass rendering optimization ongoing
-- **Documentation** - Limited official Apple documentation
-
-### ESPN API Constraints
-- **Rate Limiting** - API calls throttled during heavy usage
-- **Video Authentication** - Some content requires ESPN+ subscription
-- **Image Selection** - Occasional aspect ratio mismatches
-
-### Development Considerations
-- **Xcode-beta Required** - Standard Xcode cannot build iOS 26 targets
-- **Simulator Dependency** - Testing limited to iOS 26 simulator
-- **Glass Fallbacks** - Graceful degradation for older iOS versions
-
-## 🤝 Contributing
-
-This is an experimental prototype. Contributions welcome for:
-- **Glass Effect Enhancements** - New morphing patterns and animations
-- **Performance Optimizations** - Rendering improvements and memory management
-- **ESPN API Expansions** - Additional sports and content types
-- **Accessibility Improvements** - VoiceOver and dynamic type support
+- **Improved UX** - branching beyond the existing ESPN UX to experiment
 
 ## 📄 License
 
@@ -190,5 +110,3 @@ This project is a prototype for demonstration purposes. ESPN content and APIs ar
 ---
 
 **⚠️ Important**: This is a work-in-progress prototype demonstrating iOS 26 beta features. The liquid glass APIs and implementation patterns shown here are experimental and subject to change as iOS 26 moves toward public release.
-
-*For complete technical documentation, see [CLAUDE.md](CLAUDE.md)*

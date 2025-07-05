@@ -477,33 +477,88 @@ struct VideoItem: Identifiable, Codable, Equatable {
     
     // Cached layout type decisions to prevent repeated computation during scrolling
     var layoutType: VideoLayoutType {
-        // Check for poster/movie content first (2:3)
-        if ratio == "2:3" || 
-           type?.lowercased().contains("movie") == true ||
+        // PRIORITY 1: Check if content is playable (should always be 16:9 regardless of other factors)
+        let isPlayable = videoURL != nil || streamingURL != nil || appPlayURL != nil || 
+                        isLive || isEvent == true
+        if isPlayable {
+            switch size?.lowercased() {
+            case "lg", "large":
+                return .large
+            case "sm", "small":
+                return .small
+            default:
+                return .medium
+            }
+        }
+        
+        // PRIORITY 2: Content type analysis for non-playable logo/branding content
+        // Check for circle layout (leagues, sports, conferences) - these should always be circles
+        if type?.lowercased() == "league" ||
+           type?.lowercased() == "sport" ||
+           type?.lowercased() == "conference" ||
+           title.lowercased().contains("league") ||
+           title.lowercased().contains("sport") ||
+           title.lowercased().contains("conference") ||
+           tags.contains(where: { $0.lowercased().contains("league") }) ||
+           tags.contains(where: { $0.lowercased().contains("sport") }) {
+            return .circle
+        }
+        
+        // Check for square layout (networks, channels) - these should always be squares
+        if type?.lowercased() == "network" ||
+           type?.lowercased() == "channel" ||
+           title.lowercased().contains("network") ||
+           title.lowercased().contains("channel") ||
+           title.lowercased().contains("espn") ||
+           tags.contains("square") ||
+           tags.contains(where: { $0.lowercased().contains("network") }) ||
+           tags.contains(where: { $0.lowercased().contains("channel") }) {
+            return .square
+        }
+        
+        // PRIORITY 3: Use ESPN API-provided ratio field for other content
+        if let ratio = ratio {
+            switch ratio {
+            case "16:9":
+                // API says this is 16:9 content - respect it for non-logo content
+                switch size?.lowercased() {
+                case "lg", "large":
+                    return .large
+                case "sm", "small":
+                    return .small
+                default:
+                    return .medium
+                }
+            case "1:1":
+                // API says this is 1:1 content, but we already handled logos above
+                // This might be other square content
+                return .square
+            case "2:3":
+                return .poster
+            case "4:3":
+                return .show
+            case "58:13":
+                // Wide banner format for inline headers - treat as large 16:9
+                return .large
+            default:
+                // Unknown ratio from API, fall through to content analysis
+                break
+            }
+        }
+        
+        // PRIORITY 4: Content type analysis for remaining content
+        // Check for poster/movie content (2:3)
+        if type?.lowercased().contains("movie") == true ||
            type?.lowercased().contains("film") == true {
             return .poster
         }
         
         // Check for shows content (4:3)
-        if ratio == "4:3" || type?.lowercased() == "show" {
+        if type?.lowercased() == "show" {
             return .show
         }
         
-        // Check for circle layout (leagues, sports, conferences)
-        if type?.lowercased() == "league" ||
-           type?.lowercased() == "sport" ||
-           type?.lowercased() == "conference" {
-            return .circle
-        }
-        
-        // Check for square layout (networks, channels)
-        if type?.lowercased() == "network" ||
-           type?.lowercased() == "channel" ||
-           tags.contains("square") {
-            return .square
-        }
-        
-        // Use size-based layout
+        // PRIORITY 5: Size-based layout fallback
         switch size?.lowercased() {
         case "lg", "large":
             return .large

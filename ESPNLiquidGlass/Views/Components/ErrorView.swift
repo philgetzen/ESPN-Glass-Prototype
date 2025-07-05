@@ -12,10 +12,7 @@ struct ErrorView: View {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 60))
                 .foregroundColor(.red)
-                .glowEffect(
-                    color: .red,
-                    radius: 5
-                )
+                .glassEffect(.regular, in: Circle())
             
             // Error Message
             VStack(spacing: 8) {
@@ -41,10 +38,7 @@ struct ErrorView: View {
                     .font(.system(size: 16, weight: .medium))
             }
             .buttonStyle(.borderedProminent)
-            .glowEffect(
-                color: .blue,
-                radius: 3
-            )
+            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 8))
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)

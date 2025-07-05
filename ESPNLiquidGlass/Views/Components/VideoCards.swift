@@ -12,7 +12,8 @@ struct LargeVideoCard: View {
             VStack(alignment: .leading, spacing: 8) {
                 // Image container with 16:9 aspect ratio
                 CachedNonBlockingImage(url: video.thumbnailURL, contentMode: .fill)
-                    .frame(width: 320, height: 180)
+                    .aspectRatio(16/9, contentMode: .fill)
+                    .frame(width: 320)
                     .clipped()
                     .cornerRadius(12)
                     .overlay(
@@ -81,7 +82,8 @@ struct MediumVideoCard: View {
             VStack(alignment: .leading, spacing: 8) {
                 // Image container with 16:9 aspect ratio
                 CachedNonBlockingImage(url: video.thumbnailURL, contentMode: .fill)
-                    .frame(width: 160, height: 90)
+                    .aspectRatio(16/9, contentMode: .fill)
+                    .frame(width: 160)
                     .clipped()
                     .cornerRadius(8)
                     .overlay(
@@ -149,7 +151,8 @@ struct SmallVideoCard: View {
             VStack(alignment: .leading, spacing: 6) {
                 // Image container with 16:9 aspect ratio
                 CachedNonBlockingImage(url: video.thumbnailURL, contentMode: .fill)
-                    .frame(width: 80, height: 45)
+                    .aspectRatio(16/9, contentMode: .fill)
+                    .frame(width: 80)
                     .clipped()
                     .cornerRadius(6)
                     .overlay(
@@ -211,7 +214,8 @@ struct PosterVideoCard: View {
             VStack(alignment: .leading, spacing: 8) {
                 // Image container with 2:3 aspect ratio
                 CachedNonBlockingImage(url: video.thumbnailURL, contentMode: .fill)
-                    .frame(width: 120, height: 180)
+                    .aspectRatio(2/3, contentMode: .fill)
+                    .frame(width: 120)
                     .clipped()
                     .cornerRadius(8)
                     .overlay(
@@ -279,7 +283,8 @@ struct ShowVideoCard: View {
             VStack(alignment: .leading, spacing: 8) {
                 // Image container with 4:3 aspect ratio
                 CachedNonBlockingImage(url: video.thumbnailURL, contentMode: .fill)
-                    .frame(width: 160, height: 120)
+                    .aspectRatio(4/3, contentMode: .fill)
+                    .frame(width: 160)
                     .clipped()
                     .cornerRadius(8)
                     .overlay(
@@ -337,7 +342,7 @@ struct ShowVideoCard: View {
     }
 }
 
-/// Circle thumbnail card: 1:1 aspect ratio (100x100) for leagues/sports/conferences
+/// Circle thumbnail card: 1:1 aspect ratio (120x120) for leagues/sports/conferences
 struct CircleThumbnailCard: View {
     let video: VideoItem
     let onTap: () -> Void
@@ -346,36 +351,50 @@ struct CircleThumbnailCard: View {
         Button(action: onTap) {
             VStack(spacing: 8) {
                 ZStack {
+                    // Glass background effect (single layer)
                     Circle()
-                        .fill(LinearGradient(
-                            colors: [Color.gray.opacity(0.3), Color.gray.opacity(0.1)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ))
-                        .frame(width: 100, height: 100)
+                        .fill(Color.clear)
+                        .frame(width: 120, height: 120)
+                        .glassEffect(.regular, in: Circle())
                     
-                    // Thumbnail - circular with 2/3 size
+                    // Thumbnail - circular with optimized size
                     if let thumbnailURL = video.thumbnailURL {
-                        CachedNonBlockingImage(url: request1x1Asset(from: thumbnailURL), contentMode: .fill)
-                            .frame(width: 66, height: 66)
+                        CachedNonBlockingImage(url: request1x1Asset(from: thumbnailURL), contentMode: .fit)
+                            .frame(width: 120, height: 120)
+                            .background(Color.clear)
                             .clipShape(Circle())
+                            .padding(6)
+                    } else {
+                        // Fallback icon for missing images
+                        Circle()
+                            .fill(LinearGradient(
+                                colors: [Color.gray.opacity(0.3), Color.gray.opacity(0.1)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ))
+                            .frame(width: 100, height: 100)
+                            .overlay(
+                                Image(systemName: "sportscourt.fill")
+                                    .font(.system(size: 40))
+                                    .foregroundColor(.blue.opacity(0.7))
+                            )
                     }
                 }
                 
                 Text(video.title)
                     .font(.caption)
-                    .fontWeight(.medium)
+                    .fontWeight(.semibold)
                     .foregroundColor(.white)
                     .lineLimit(2)
                     .multilineTextAlignment(.center)
-                    .frame(width: 100)
+                    .frame(width: 120)
             }
         }
         .buttonStyle(PlainButtonStyle())
     }
 }
 
-/// Square thumbnail card: 1:1 aspect ratio (100x100) for networks/channels
+/// Square thumbnail card: 1:1 aspect ratio (120x120) for networks/channels
 struct SquareThumbnailCard: View {
     let video: VideoItem
     let onTap: () -> Void
@@ -384,30 +403,42 @@ struct SquareThumbnailCard: View {
         Button(action: onTap) {
             VStack(spacing: 8) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(LinearGradient(
-                            colors: [Color.gray.opacity(0.3), Color.gray.opacity(0.1)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ))
-                        .frame(width: 100, height: 100)
+                    // Glass background effect (single layer)
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.clear)
+                        .frame(width: 120, height: 120)
+                        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
                     
-                    // Thumbnail - square with 2/3 size
+                    // Thumbnail - square with optimized size
                     if let thumbnailURL = video.thumbnailURL {
-                        CachedNonBlockingImage(url: request1x1Asset(from: thumbnailURL), contentMode: .fill)
-                            .frame(width: 66, height: 66)
+                        CachedNonBlockingImage(url: request1x1Asset(from: thumbnailURL), contentMode: .fit)
+                            .frame(width: 100, height: 100)
                             .clipped()
-                            .cornerRadius(8)
+                            .cornerRadius(10)
+                    } else {
+                        // Fallback icon for missing images
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(LinearGradient(
+                                colors: [Color.gray.opacity(0.3), Color.gray.opacity(0.1)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ))
+                            .frame(width: 100, height: 100)
+                            .overlay(
+                                Image(systemName: "tv.fill")
+                                    .font(.system(size: 40))
+                                    .foregroundColor(.purple.opacity(0.7))
+                            )
                     }
                 }
                 
                 Text(video.title)
                     .font(.caption)
-                    .fontWeight(.medium)
+                    .fontWeight(.semibold)
                     .foregroundColor(.white)
                     .lineLimit(2)
                     .multilineTextAlignment(.center)
-                    .frame(width: 100)
+                    .frame(width: 120)
             }
         }
         .buttonStyle(PlainButtonStyle())
@@ -594,7 +625,7 @@ struct InlineHeaderCard: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
         }
-        .espnGlassCard(cornerRadius: 12, density: ESPNGlassDensity.light)
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
         .padding(.horizontal)
         .preferredColorScheme(.dark)
     }

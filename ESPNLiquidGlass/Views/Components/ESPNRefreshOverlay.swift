@@ -14,10 +14,7 @@ struct ESPNRefreshOverlay: ViewModifier {
                             .onAppear {
                                 print("🎯 ESPN Refresh Overlay: Icon appeared")
                             }
-                            .glowEffect(
-                                color: .red,
-                                radius: 6
-                            )
+                            .glassEffect(.regular, in: Circle())
                             .background(
                                 // Larger background to hide system indicator
                                 Circle()

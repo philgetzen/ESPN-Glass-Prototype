@@ -174,7 +174,7 @@ struct ESPNPlusView: View {
                 SettingsView(colorScheme: $colorScheme)
                     .preferredColorScheme(colorScheme)
             }
-            .refreshableWithHaptics {
+            .refreshable {
                 await refreshPlusContent()
             }
         }

@@ -87,7 +87,7 @@ struct HomeView: View {
             .task {
                 await loadArticlesIfNeeded(force: false)
             }
-            .refreshableWithHaptics {
+            .refreshable {
                 await MainActor.run { isRefreshing = true }
                 // Add delay to ensure refresh indicator shows
                 try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds

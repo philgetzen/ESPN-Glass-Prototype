@@ -4,6 +4,8 @@ import SwiftUI
 struct ContentView: View {
     @State private var selectedTab = 0
     @State private var colorScheme: ColorScheme? = nil
+    @State private var showESPNPlusConstructionOverlay = true
+    @State private var showMoreConstructionOverlay = true
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -23,10 +25,28 @@ struct ContentView: View {
                 ESPNPlusView(colorScheme: $colorScheme)
                     .tabItem { Label("ESPN+", systemImage: "plus.rectangle") }
                     .tag(3)
+                    .overlay {
+                        if showESPNPlusConstructionOverlay && selectedTab == 3 {
+                            UnderConstructionOverlay(onDismiss: {
+                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                    showESPNPlusConstructionOverlay = false
+                                }
+                            })
+                        }
+                    }
 
                 MoreView(colorScheme: $colorScheme)
                     .tabItem { Label("More", systemImage: "ellipsis") }
                     .tag(4)
+                    .overlay {
+                        if showMoreConstructionOverlay && selectedTab == 4 {
+                            UnderConstructionOverlay(onDismiss: {
+                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                    showMoreConstructionOverlay = false
+                                }
+                            })
+                        }
+                    }
         }
         .preferredColorScheme(colorScheme)
         .onAppear {

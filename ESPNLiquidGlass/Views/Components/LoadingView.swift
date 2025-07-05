@@ -13,10 +13,7 @@ struct LoadingView: View {
     var body: some View {
         VStack(spacing: 16) {
             ESPNAnimatedLoadingIcon(size: 60)
-                .glowEffect(
-                    color: .red,
-                    radius: 8
-                )
+                .glassEffect(.regular, in: Circle())
             
             if let message = message {
                 Text(message)

@@ -186,7 +186,7 @@ struct MoreView: View {
                 SettingsView(colorScheme: $colorScheme)
                     .preferredColorScheme(colorScheme)
             }
-            .refreshableWithHaptics {
+            .refreshable {
                 await refreshMoreContent()
             }
         }
@@ -227,6 +227,7 @@ struct SportDetailView: View {
         }
         .background(Color.black)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarColorScheme(.dark, for: .navigationBar)
     }
 }
 

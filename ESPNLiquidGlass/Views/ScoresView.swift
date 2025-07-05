@@ -60,7 +60,7 @@ struct ScoresView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Date slider and sport toggles with frosted glass effect
+                // Date slider and sport toggles with glass effect
                 VStack(spacing: 0) {
                     // Date slider
                     dateSlider
@@ -68,7 +68,8 @@ struct ScoresView: View {
                     // Sport filter toggles
                     sportToggles
                 }
-                .background(overlayColor)
+                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 0))
+                .background(Color.clear)
                 
                 // Games list
                 Group {
@@ -115,23 +116,19 @@ struct ScoresView: View {
                 }
             }
             .adaptiveBackground()
-            .navigationTitle("Scores")
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
-            .espnGlassToolbar()
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showSettings = true }) {
-                        Image(systemName: "gearshape.fill")
-                            .font(.body)
-                            .foregroundStyle(.primary)
-                    }
-                }
-            }
+            .espnToolbar(
+                logoType: .standardLogo,
+                isDarkMode: (colorScheme ?? environmentColorScheme) == .dark,
+                forceDarkToolbar: false,
+                onSettingsTap: { showSettings = true }
+            )
             .task {
                 await loadScores()
             }
             .espnPullToRefreshOverlay(isRefreshing: isRefreshing, topOffset: 135)
-            .refreshableWithHaptics {
+            .refreshable {
                 await MainActor.run { isRefreshing = true }
                 // Add delay to ensure refresh indicator shows
                 try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
@@ -358,17 +355,24 @@ struct DateButton: View {
         }
         .frame(width: 50, height: 60)
         .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(
-                    isSelected ? Color.red : 
-                    (isToday ? Color.white.opacity(0.1) : Color.clear)
-                )
-                .padding(.horizontal, isToday && !isSelected ? 3 : 0)
-                .glowEffect(
-                    color: isSelected ? .red : .clear,
-                    radius: 4
-                )
-                .shadow(color: isSelected ? .red.opacity(0.3) : .clear, radius: 4, x: 0, y: 2)
+            Group {
+                if isSelected {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.red)
+                        .shadow(color: .red.opacity(0.4), radius: 6, x: 0, y: 2)
+                        .shadow(color: .red.opacity(0.2), radius: 12, x: 0, y: 4)
+                } else if isToday {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.white.opacity(0.1))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                        )
+                } else {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.clear)
+                }
+            }
         )
     }
 }
@@ -393,10 +397,6 @@ struct SportToggle: View {
             .background(
                 Capsule()
                     .fill(isSelected ? Color.yellow : Color.gray.opacity(0.15))
-                    .glowEffect(
-                        color: isSelected ? .yellow : .clear,
-                        radius: 3
-                    )
                     .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
             )
             .opacity(hasGames || sport == "Top Events" ? 1.0 : 0.6)
@@ -474,7 +474,7 @@ struct GamesList: View {
                     }
                 }
             }
-            .espnGlassCard(cornerRadius: 16, density: ESPNGlassDensity.medium)
+            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 16))
             .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
             .shadow(color: Color.black.opacity(0.1), radius: 16, x: 0, y: 8)
             .padding(.horizontal, 16)

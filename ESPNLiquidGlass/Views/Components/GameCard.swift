@@ -43,7 +43,7 @@ struct GameCard: View {
                 )
                 .shadow(color: .red.opacity(0.5), radius: 4, x: 0, y: 2)
                 // Using the glowEffect from our unified glass effects
-                .glowEffect(color: .red, radius: 3)
+                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 4))
         } else {
             // Empty space to maintain layout consistency
             Color.clear
@@ -215,7 +215,7 @@ struct GameCard: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
         .background(Color.clear)
-        .espnLiveGameGlass(isLive: event.isLive)
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
     }
     
     private func teamRow(team: ESPNEvent.Competition.Competitor?, isWinner: Bool) -> some View {

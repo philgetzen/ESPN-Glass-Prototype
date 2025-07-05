@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "ESPNLiquidGlass",
     platforms: [
-        .iOS("26.0")
+        .iOS("26.0")  // Using iOS 26.0 for Liquid Glass APIs
     ],
     products: [
         .library(

@@ -24,7 +24,8 @@ struct ArticleCard: View {
             // Content section
             cardContent
         }
-        .espnGlassCard(cornerRadius: 16)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 16))
         .padding(.horizontal)
         .onTapGesture {
             onArticleTap()
@@ -53,14 +54,10 @@ struct ArticleCard: View {
     // MARK: - Image Container
     private var imageContainer: some View {
         Group {
-            if let imageURL = article.imageURL, let url = URL(string: imageURL) {
-                AsyncImage(url: url) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    imagePlaceholder
-                }
+            if let imageURL = article.imageURL {
+                CachedNonBlockingImage(url: imageURL, contentMode: .fill)
+            } else {
+                imagePlaceholder
             }
         }
     }
@@ -87,10 +84,10 @@ struct ArticleCard: View {
     // MARK: - Image Clip Shape
     private var imageClipShape: UnevenRoundedRectangle {
         UnevenRoundedRectangle(cornerRadii: .init(
-            topLeading: 12,
+            topLeading: 16,
             bottomLeading: 0,
             bottomTrailing: 0,
-            topTrailing: 12
+            topTrailing: 16
         ))
     }
     
@@ -111,10 +108,7 @@ struct ArticleCard: View {
             Circle()
                 .fill(.ultraThinMaterial)
                 .frame(width: 60, height: 60)
-                .glassEffect(
-                    .regular,
-                    in: Circle()
-                )
+                .glassEffect(.regular, in: Circle())
             
             playIcon
         }
@@ -166,7 +160,8 @@ struct ArticleCard: View {
             collapsedCardFooter
         }
         .padding(12)
-        .espnGlassCard(cornerRadius: 12)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
         .padding(.horizontal)
         .onTapGesture {
             onArticleTap()

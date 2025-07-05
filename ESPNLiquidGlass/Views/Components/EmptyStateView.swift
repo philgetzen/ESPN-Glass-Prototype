@@ -12,10 +12,7 @@ struct EmptyStateView: View {
             Image(systemName: icon)
                 .font(.system(size: 60))
                 .foregroundColor(.secondary)
-                .glowEffect(
-                    color: .gray,
-                    radius: 5
-                )
+                .glassEffect(.regular, in: Circle())
             
             VStack(spacing: 8) {
                 Text(title)

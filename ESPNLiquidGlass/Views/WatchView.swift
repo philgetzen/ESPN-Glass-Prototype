@@ -70,37 +70,29 @@ struct WatchView: View {
                 .ignoresSafeArea(.all)
             )
             .adaptiveBackground()
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarColorScheme(.dark, for: .navigationBar)
-            .espnGlassToolbar()
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showSettings = true }) {
-                        Image(systemName: "gearshape.fill")
-                            .font(.body)
-                            .foregroundStyle(.white)
-                    }
-                }
-            }
-            .id("watch-toolbar")
+            .espnToolbar(
+                logoType: .standardLogo,
+                onSettingsTap: { showSettings = true }
+            )
             .sheet(isPresented: $showSettings) {
                 SettingsView(colorScheme: $colorScheme)
                     .preferredColorScheme(colorScheme)
             }
             .sheet(item: $selectedVideoItem) { video in
-                LazyView {
-                    if let streamingURL = video.streamingURL,
-                       !streamingURL.isEmpty,
-                       let url = URL(string: streamingURL) {
-                        VideoPlayerView(videoURL: url, article: Article(from: video))
-                            .preferredColorScheme(.dark)
-                            .onDisappear {
-                                selectedVideoItem = nil
-                            }
-                    } else {
-                        VStack {
-                            Text("Video Unavailable")
-                                .font(.headline)
+                if let streamingURL = video.streamingURL,
+                   !streamingURL.isEmpty,
+                   let url = URL(string: streamingURL) {
+                    VideoPlayerView(videoURL: url, article: Article(from: video))
+                        .preferredColorScheme(.dark)
+                        .onDisappear {
+                            selectedVideoItem = nil
+                        }
+                } else {
+                    VStack {
+                        Text("Video Unavailable")
+                            .font(.headline)
                             Text("This video cannot be played at this time.")
                                 .foregroundColor(.secondary)
                             Button("Close") {
@@ -110,7 +102,6 @@ struct WatchView: View {
                         }
                         .preferredColorScheme(.dark)
                     }
-                }
             }
             .alert("ESPN App Required", isPresented: $showESPNAppAlert) {
                 Button("Open ESPN App") {
@@ -126,7 +117,7 @@ struct WatchView: View {
                 Text("Content is not playable at this time.\n\nDebug: \(playbackErrorMessage)")
             }
         }
-        .refreshableWithHaptics {
+        .refreshable {
             await MainActor.run { isRefreshing = true }
             try? await Task.sleep(nanoseconds: 500_000_000)
             await loadVideoContentIfNeeded(force: true)

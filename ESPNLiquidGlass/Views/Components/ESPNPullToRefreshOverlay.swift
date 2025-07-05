@@ -11,10 +11,7 @@ struct ESPNPullToRefreshOverlay: ViewModifier {
                     VStack {
                         if isRefreshing {
                             ESPNAnimatedLoadingIcon(size: 40)
-                                .glowEffect(
-                                    color: .red,
-                                    radius: 8
-                                )
+                                .glassEffect(.regular, in: Circle())
                                 .background(
                                     Circle()
                                         .fill(Color(UIColor.systemBackground))
@@ -23,7 +20,7 @@ struct ESPNPullToRefreshOverlay: ViewModifier {
                                 )
                                 .scaleEffect(1.0)
                                 .opacity(1.0)
-                                .animation(.bouncy(duration: 0.3), value: isRefreshing)
+                                .animation(.easeInOut(duration: 0.3), value: isRefreshing)
                         }
                         Spacer()
                     }

@@ -8,10 +8,7 @@ struct ESPNRefreshIndicator: View {
         VStack {
             if isRefreshing {
                 ESPNAnimatedLoadingIcon(size: 40)
-                    .glowEffect(
-                        color: .red,
-                        radius: 6
-                    )
+                    .glassEffect(.regular, in: Circle())
                     .opacity(isVisible ? 1 : 0)
                     .scaleEffect(isVisible ? 1 : 0.8)
                     .animation(.easeInOut(duration: 0.3), value: isVisible)

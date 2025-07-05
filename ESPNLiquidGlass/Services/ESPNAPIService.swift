@@ -256,7 +256,9 @@ final class ESPNAPIService: Sendable {
             return categories
             
         } catch {
-            throw error
+            // If network request fails, return offline fallback content
+            print("Watch API failed with error: \(error). Using offline fallback content.")
+            return createOfflineVideoContent()
         }
     }
     
@@ -280,5 +282,76 @@ final class ESPNAPIService: Sendable {
         }
         
         return videoHref
+    }
+    
+    // MARK: - Offline Fallback Content
+    
+    private func createOfflineVideoContent() -> [VideoCategory] {
+        let fallbackVideos = [
+            VideoItem(
+                title: "ESPN Network Currently Unavailable",
+                description: "Check your internet connection and try again",
+                thumbnailURL: nil,
+                videoURL: nil,
+                duration: nil,
+                publishedDate: Date(),
+                sport: "General",
+                league: nil,
+                isLive: false,
+                viewCount: nil,
+                tags: ["offline", "system"],
+                autoplay: false,
+                showMetadata: true,
+                size: "md",
+                type: "system",
+                network: "ESPN",
+                reAir: nil,
+                eventName: nil,
+                ratio: "16:9",
+                authType: [],
+                streamingURL: nil,
+                contentId: "offline-1",
+                isEvent: false,
+                appPlayURL: nil
+            ),
+            VideoItem(
+                title: "Offline Mode - Demo Content",
+                description: "ESPN Watch will automatically reconnect when internet is available",
+                thumbnailURL: nil,
+                videoURL: nil,
+                duration: nil,
+                publishedDate: Date(),
+                sport: "General",
+                league: nil,
+                isLive: false,
+                viewCount: nil,
+                tags: ["offline", "demo"],
+                autoplay: false,
+                showMetadata: true,
+                size: "md",
+                type: "system",
+                network: "ESPN",
+                reAir: nil,
+                eventName: nil,
+                ratio: "16:9",
+                authType: [],
+                streamingURL: nil,
+                contentId: "offline-2",
+                isEvent: false,
+                appPlayURL: nil
+            )
+        ]
+        
+        return [
+            VideoCategory(
+                name: "Connection Status",
+                description: "Network connectivity information",
+                videos: fallbackVideos,
+                isLive: false,
+                priority: 0,
+                tags: ["offline"],
+                showTitle: true
+            )
+        ]
     }
 }

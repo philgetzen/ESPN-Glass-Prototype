@@ -205,12 +205,23 @@ struct VideoCategorySection: View {
     
     private func isLeagueSportOrConference(_ name: String) -> Bool {
         let lowerName = name.lowercased()
-        return lowerName == "leagues" || lowerName == "sports" || lowerName == "conferences"
+        return lowerName == "leagues" || 
+               lowerName == "sports" || 
+               lowerName == "conferences" ||
+               lowerName.contains("league") ||
+               lowerName.contains("sport") ||
+               lowerName.contains("conference") ||
+               lowerName == "mlb" || lowerName == "nfl" || lowerName == "nba" || lowerName == "nhl" ||
+               lowerName == "mls" || lowerName == "ncaa" || lowerName == "wnba"
     }
     
     private func isNetwork(_ name: String) -> Bool {
         let lowerName = name.lowercased()
-        return lowerName == "channels" || lowerName.contains("network")
+        return lowerName == "channels" || 
+               lowerName.contains("network") ||
+               lowerName.contains("channel") ||
+               lowerName == "espn" || lowerName == "espn2" || lowerName == "espnu" ||
+               lowerName == "sec network" || lowerName == "acc network"
     }
     
     private func getAspectRatio(for video: VideoItem) -> CGFloat {
@@ -232,26 +243,36 @@ struct VideoCategorySection: View {
     
     @ViewBuilder
     private func videoCardForContent(video: VideoItem, onTap: @escaping () -> Void) -> some View {
+        // Special override for rowCap tags
         if video.tags.contains("rowCap") || shouldUseSquareForFirstItem(video) {
             SquareThumbnailCard(video: video, onTap: onTap)
         } else {
-            let categoryName = category.name.lowercased()
-            
-            switch video.layoutType {
-            case .poster where !categoryName.contains("shows"):
-                PosterVideoCard(video: video, onTap: onTap)
-            case .show, .poster:
-                ShowVideoCard(video: video, onTap: onTap)
-            case .circle where isLeagueSportOrConference(category.name):
+            // CATEGORY-LEVEL OVERRIDES: Force specific layouts based on category context
+            // This ensures that category intent overrides individual item properties
+            if isLeagueSportOrConference(category.name) {
+                // All items in Leagues/Sports/Conferences categories should be circles
                 CircleThumbnailCard(video: video, onTap: onTap)
-            case .square where isNetwork(category.name):
+            } else if isNetwork(category.name) {
+                // All items in Channels/Networks categories should be squares
                 SquareThumbnailCard(video: video, onTap: onTap)
-            case .large:
-                LargeVideoCard(video: video, onTap: onTap)
-            case .small:
-                SmallVideoCard(video: video, onTap: onTap)
-            default:
-                MediumVideoCard(video: video, onTap: onTap)
+            } else {
+                // For other categories, use the video's layout type
+                switch video.layoutType {
+                case .poster:
+                    PosterVideoCard(video: video, onTap: onTap)
+                case .show:
+                    ShowVideoCard(video: video, onTap: onTap)
+                case .circle:
+                    CircleThumbnailCard(video: video, onTap: onTap)
+                case .square:
+                    SquareThumbnailCard(video: video, onTap: onTap)
+                case .large:
+                    LargeVideoCard(video: video, onTap: onTap)
+                case .small:
+                    SmallVideoCard(video: video, onTap: onTap)
+                case .medium:
+                    MediumVideoCard(video: video, onTap: onTap)
+                }
             }
         }
     }

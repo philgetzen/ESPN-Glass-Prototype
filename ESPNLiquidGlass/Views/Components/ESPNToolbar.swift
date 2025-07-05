@@ -54,14 +54,14 @@ struct ESPNToolbar: ToolbarContent {
                             .foregroundColor(forcesDarkIcons ? .black : (isDarkMode ? .white : .primary))
                             .font(.system(size: 16, weight: .medium))
                     }
-                    .buttonStyle(ESPNGlassButtonStyle())
+                    .buttonStyle(GlassButtonStyle())
                     
                     Button(action: onSettingsTap) {
                         Image(systemName: "gear")
                             .foregroundColor(forcesDarkIcons ? .black : (isDarkMode ? .white : .primary))
                             .font(.system(size: 16, weight: .medium))
                     }
-                    .buttonStyle(ESPNGlassButtonStyle())
+                    .buttonStyle(GlassButtonStyle())
                 } else {
                     // Fallback for older iOS versions
                     Button(action: onSearchTap) {
@@ -100,6 +100,7 @@ extension View {
         logoType: ESPNToolbar.LogoType = .standardLogo,
         isDarkMode: Bool = false,
         forcesDarkIcons: Bool = false,
+        forceDarkToolbar: Bool = true,
         onSearchTap: @escaping () -> Void = {},
         onSettingsTap: @escaping () -> Void
     ) -> some View {
@@ -113,6 +114,7 @@ extension View {
                     onSettingsTap: onSettingsTap
                 )
             }
+            .toolbarColorScheme(forceDarkToolbar ? .dark : (isDarkMode ? .dark : .light), for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
     }
@@ -121,6 +123,7 @@ extension View {
     func espnNavigationBarStyle() -> some View {
         self
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
     }
